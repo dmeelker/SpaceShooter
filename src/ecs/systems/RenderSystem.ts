@@ -1,4 +1,4 @@
-import { ComponentStore, EntityComponentSystem } from "../EntityComponentSystem";
+import { EntityComponentSystem } from "../EntityComponentSystem";
 import { RenderComponent } from "../components/RenderComponent";
 import { DimensionsComponent } from "../components/DimensionsComponent";
 
@@ -10,5 +10,18 @@ export function render(ecs: EntityComponentSystem, context: CanvasRenderingConte
 }
 
 function updateComponent(renderComponent: RenderComponent, dimensionsComponent: DimensionsComponent, context: CanvasRenderingContext2D) {
-    context.drawImage(renderComponent.image, dimensionsComponent.bounds.location.x, dimensionsComponent.bounds.location.y);
+    const location = dimensionsComponent.bounds.location;
+    const center = dimensionsComponent.center;
+    const scale = dimensionsComponent.scale;
+
+    if (dimensionsComponent.rotationInRadians == 0 && scale.x == 0 && scale.y == 0) {
+        context.drawImage(renderComponent.image, location.x, location.y);
+    } else {
+        context.save();
+        context.translate(location.x, location.y);
+        context.scale(scale.x, scale.y);
+        context.rotate(dimensionsComponent.rotationInRadians);
+        context.drawImage(renderComponent.image, -center.x, -center.y);
+        context.restore();
+    }
 }

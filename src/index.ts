@@ -26,7 +26,9 @@ interface FrameTime {
 async function main() {
     await loadImages();
 
-    ecs.components.dimensionsComponents.add(new DimensionsComponent(tankId, new Rectangle({x: 10, y: 10}, {width: 20, height: 20})));
+    const dimensions = new DimensionsComponent(tankId, new Rectangle({x: 10, y: 10}, {width: 12, height: 16}));
+    dimensions.center = {x: 6, y: 8};
+    ecs.components.dimensionsComponents.add(dimensions);
     ecs.components.renderComponents.add(new RenderComponent(tankId, images.get("test1")));
 
     window.requestAnimationFrame(processFrame)
@@ -71,6 +73,10 @@ function update(time: FrameTime) {
     if (keyboard.isButtonDown("ArrowDown")) {
         location.y += time.timeSinceLastFrame * 0.2;
     }
+
+    // dimensions.rotationInDegrees += 1;
+    // dimensions.scale.x = 1 + Math.abs((Math.sin(time.currentTime / 1000) * 5));
+    // dimensions.scale.y = 1 + Math.abs((Math.sin(time.currentTime / 1000) * 5));
 
     keyboard.nextFrame();
 }
