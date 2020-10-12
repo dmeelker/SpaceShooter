@@ -12,6 +12,7 @@ export class Keyboard {
     }
 
     private onKeyDown(keyEvent: KeyboardEvent) {
+        console.log(keyEvent);
         this._keyStates.set(keyEvent.key, true);
         this._frameButtonPresses.set(keyEvent.key, true);
     }

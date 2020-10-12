@@ -1,7 +1,7 @@
 interface ImageRegistration {
     code: string;
     url: string;
-    image: HTMLImageElement | null;
+    image: ImageBitmap | null;
 }
 
 export class ImageLoader {
@@ -30,16 +30,17 @@ export class ImageLoader {
     private loadImage(imageRegistration: ImageRegistration): Promise<void> {
 		return new Promise<void>((resolve) => {
 			let image = new Image();
-			image.addEventListener('load', function() {
-				console.log('Loaded ' + imageRegistration.url);
-				imageRegistration.image = image;
+			image.addEventListener('load', async () => {
+                console.log('Loaded ' + imageRegistration.url);
+                const bitmap = window.createImageBitmap(image);
+				imageRegistration.image = await bitmap;
 				resolve();
 			}, false);
 			image.src = imageRegistration.url;
 		});
     }
     
-    public get(code: string): HTMLImageElement {
+    public get(code: string): ImageBitmap {
         return this._images.get(code).image;
     }
 }

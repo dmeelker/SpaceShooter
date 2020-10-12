@@ -1,5 +1,6 @@
 import { DimensionsComponent } from "./components/DimensionsComponent";
 import { RenderComponent } from "./components/RenderComponent";
+import { VelocityComponent } from "./components/VelocityComponent";
 
 export type EntityId = number;
 
@@ -34,6 +35,7 @@ export class ComponentList<TComponent extends Component> {
 export class ComponentStore {
     public readonly renderComponents = new ComponentList<RenderComponent>();
     public readonly dimensionsComponents = new ComponentList<DimensionsComponent>();
+    public readonly velocityComponents = new ComponentList<VelocityComponent>();
 }
 
 export class EntityComponentSystem {

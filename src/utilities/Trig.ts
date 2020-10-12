@@ -71,10 +71,28 @@ export class Vector {
         return new Vector(this._x / length, this._y / length);
     }
 
+    public get angleInRadians(): number {
+        return Math.atan2(this._y, this._x);
+    }
+
+    public get angleInDegrees(): number {
+        return radiansToDegrees(this.angleInRadians);
+    }
+
     static interpolate(v1: Vector, v2: Vector, amount: number) {
         return new Vector(
             v1.x + ((v2.x - v1.x) * amount),
             v1.y + ((v2.y - v1.y) * amount));
+    }
+
+    static fromRadianAngle(radians: number) : Vector {
+        return new Vector(
+            Math.cos(radians),
+            Math.sin(radians));
+    }
+
+    static fromDegreeAngle(degrees: number) : Vector {
+        return this.fromRadianAngle(degreesToRadians(degrees));
     }
 
     public clone() {
