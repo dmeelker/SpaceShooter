@@ -83,6 +83,7 @@ function update(time: FrameTime) {
     }
 
     MovementSystem.update(time, ecs);
+    ecs.removeDisposedEntities();
 
     keyboard.nextFrame();
 }

@@ -36,20 +36,46 @@ export class ComponentStore {
     public readonly renderComponents = new ComponentList<RenderComponent>();
     public readonly dimensionsComponents = new ComponentList<DimensionsComponent>();
     public readonly velocityComponents = new ComponentList<VelocityComponent>();
+    private readonly _all = [this.renderComponents, this.dimensionsComponents, this.velocityComponents];
+
+    public removeComponentsForEntity(entityId: EntityId) {
+        for(let store of this._all) {
+            store.remove(entityId);
+        }
+    }
 }
 
 export class EntityComponentSystem {
     public readonly components = new ComponentStore();
     public readonly entities = new Set<EntityId>();
     private _lastEntityId: EntityId = 0;
+    private readonly _availableEntityIds = new Array<EntityId>();
+    private readonly _disposableEntityIds = new Array<EntityId>();
 
     public allocateEntityId(): EntityId {
-        this._lastEntityId++;
-        this.entities.add(this._lastEntityId);
-        return this._lastEntityId;
+        if (this._availableEntityIds.length > 0) {
+            return this._availableEntityIds.pop();
+        } else {
+            this._lastEntityId++;
+            this.entities.add(this._lastEntityId);
+            return this._lastEntityId;
+        }
     }
 
     public freeEntityId(id: EntityId) {
         this.entities.delete(id);
+        this._availableEntityIds.push(id);
+    }
+
+    public disposeEntity(id: EntityId) {
+        this._disposableEntityIds.push(id);
+    }
+
+    public removeDisposedEntities() {
+        while(this._disposableEntityIds.length > 0) {
+            const id = this._disposableEntityIds.pop();
+            this.freeEntityId(id);
+            this.components.removeComponentsForEntity(id);
+        }
     }
 }
