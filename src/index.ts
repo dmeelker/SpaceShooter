@@ -10,6 +10,7 @@ import { RenderComponent } from "./ecs/components/RenderComponent";
 import { FrameTime } from "./utilities/FrameTime";
 import { VelocityComponent } from "./ecs/components/VelocityComponent";
 import { createProjectile } from "./ecs/EntityFactory";
+import { SpriteSheetLoader } from "./utilities/SpriteSheetLoader";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d");
@@ -21,6 +22,7 @@ const ecs = new EntityComponentSystem();
 let lastFrameTime = 0;
 
 const tankId = ecs.allocateEntityId();
+let ships : Array<ImageBitmap>
 
 async function main() {
     await loadImages();
@@ -36,8 +38,12 @@ async function main() {
 async function loadImages() {
     images.add("ship", "gfx/ship.png");
     images.add("shot", "gfx/shot.png");
-    
+    images.add("shipsheet", "gfx/16ShipCollectionPRE2.png");
     await images.load();
+
+    const sheet = images.get("shipsheet");
+    ships = await new SpriteSheetLoader().cutSpriteSheet(sheet, 10, 10);
+    //console.log(sprites);
 }
 
 function processFrame(time: number) {
@@ -94,6 +100,14 @@ function render() {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     RenderSystem.render(ecs, context);
+
+    let index = 0;
+    for(let ship of ships) {
+        let x = (index % 10) * 20;
+        let y = Math.floor(index / 10) * 20
+        context.drawImage(ship, index * 20, 10);
+        index++;
+    }   
     //let tank = images.get("test1");
 
     // context.drawImage(tank, location.x, location.y);
