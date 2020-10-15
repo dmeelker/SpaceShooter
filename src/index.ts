@@ -1,16 +1,17 @@
 import { Images } from "./utilities/Images";
 import { FrameCounter } from "./utilities/FrameCounter";
 import { Keyboard } from "./utilities/Keyboard";
-import { EntityComponentSystem } from "./ecs/EntityComponentSystem";
+import { EntityComponentSystem, EntityId } from "./ecs/EntityComponentSystem";
 import * as RenderSystem from "./ecs/systems/RenderSystem";
 import * as MovementSystem from "./ecs/systems/MovementSystem";
 import * as ProjectileSystem from "./ecs/systems/ProjectileSystem";
+import * as ShipControllerSystem from "./ecs/systems/ShipControllerSystem";
 import { DimensionsComponent } from "./ecs/components/DimensionsComponent";
 import { Rectangle, Vector } from "./utilities/Trig";
 import { RenderComponent } from "./ecs/components/RenderComponent";
 import { FrameTime } from "./utilities/FrameTime";
 import { VelocityComponent } from "./ecs/components/VelocityComponent";
-import { createProjectile, createShip } from "./ecs/EntityFactory";
+import { createPlayerShip, createProjectile, createShip } from "./ecs/EntityFactory";
 import { SpriteSheetLoader } from "./utilities/SpriteSheetLoader";
 import { IGameContext } from "./GameContext";
 import { ProjectileType } from "./ecs/components/ProjectileComponent";
@@ -30,7 +31,7 @@ class GameContext implements IGameContext {
 let levelProgress: LevelProgressManager;
 
 const context = new GameContext();
-const tankId = context.ecs.allocateEntityId();
+let tankId: EntityId;
 context.canvas = document.getElementById("canvas") as HTMLCanvasElement;
 context.renderContext = context.canvas.getContext("2d");
 context.viewSize = new Rectangle(0, 0, context.canvas.width, context.canvas.height);
@@ -44,11 +45,6 @@ const fireTimer = new Timer(200);
 async function main() {
     await initialize();
 
-    const dimensions = new DimensionsComponent(tankId, new Rectangle(10, 10, 12, 16));
-    dimensions.center = {x: 6, y: 8};
-    context.ecs.components.dimensionsComponents.add(dimensions);
-    context.ecs.components.renderComponents.add(new RenderComponent(tankId, context.images.get("ship")));
-    
     window.requestAnimationFrame(processFrame);
 }
 
@@ -56,6 +52,7 @@ async function initialize() {
     await loadImages();
 
     levelProgress = new LevelProgressManager(Level1);
+    tankId = createPlayerShip(context, {x: 10, y: 10});
 }
 
 async function loadImages() {
@@ -88,6 +85,7 @@ function update(time: FrameTime) {
     handleInput(time);
 
     levelProgress.update(time, context);
+    ShipControllerSystem.update(context);
     MovementSystem.update(context);
     ProjectileSystem.update(context);
     context.ecs.removeDisposedEntities();
@@ -127,6 +125,10 @@ function render() {
     context.renderContext.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
     RenderSystem.render(context.ecs, context.renderContext);
+
+    // context.renderContext.font = '12px sans-serif';
+    // context.renderContext.fillStyle = "white";
+    // context.renderContext.fillText('Hello world', 10, 50);
 }
 
 main();

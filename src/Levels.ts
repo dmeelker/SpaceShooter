@@ -13,6 +13,7 @@ export interface ILevelWave {
 export interface ILevelEnemy {
     y: number;
     speed: number;
+    angle?: number;
 }
 
 export class LevelProgressManager {
@@ -37,7 +38,8 @@ export class LevelProgressManager {
     private spawnWave(wave: ILevelWave, context: IGameContext) {
         for(let enemy of wave.enemies) {
             const location = {x: context.viewSize.size.width, y: context.viewSize.size.height * (enemy.y / 100)};
-            const vector = Vector.fromDegreeAngle(180).multiplyScalar(enemy.speed);
+            const angle = enemy.angle ?? 180;
+            const vector = Vector.fromDegreeAngle(angle).multiplyScalar(enemy.speed);
 
             createShip(context.ecs, context.images, location, vector);
         }
