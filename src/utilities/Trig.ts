@@ -12,9 +12,9 @@ export class Rectangle {
     public location: Point;
     public size: Size;
 
-    constructor(location: Point, size: Size) {
-        this.location = location;
-        this.size = size;
+    constructor(x: number, y: number, width: number, height: number) {
+        this.location = {x, y}
+        this.size = {width, height};
     }
 
     public overlaps(other: Rectangle): boolean {

@@ -14,14 +14,14 @@ function updateComponent(renderComponent: RenderComponent, dimensionsComponent: 
     const center = dimensionsComponent.center;
     const scale = dimensionsComponent.scale;
 
-    // if (dimensionsComponent.rotationInRadians == 0 && scale.x == 0 && scale.y == 0) {
-    //     context.drawImage(renderComponent.image, location.x, location.y);
-    // } else {
+    if (dimensionsComponent.rotationInRadians == 0 && scale.x == 0 && scale.y == 0) {
+        context.drawImage(renderComponent.image, location.x, location.y);
+    } else {
         context.save();
         context.translate(location.x, location.y);
         context.scale(scale.x, scale.y);
         context.rotate(dimensionsComponent.rotationInRadians);
         context.drawImage(renderComponent.image, -center.x, -center.y);
         context.restore();
-    //}
+    }
 }

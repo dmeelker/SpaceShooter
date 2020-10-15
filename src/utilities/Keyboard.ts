@@ -13,25 +13,25 @@ export class Keyboard {
 
     private onKeyDown(keyEvent: KeyboardEvent) {
         console.log(keyEvent);
-        this._keyStates.set(keyEvent.key, true);
-        this._frameButtonPresses.set(keyEvent.key, true);
+        this._keyStates.set(keyEvent.code, true);
+        this._frameButtonPresses.set(keyEvent.code, true);
     }
 
     private onKeyUp(keyEvent: KeyboardEvent) {
-        this._keyStates.set(keyEvent.key, false);
+        this._keyStates.set(keyEvent.code, false);
     }
 
-    public isButtonDown(key: string): boolean {
-        if(this._keyStates.has(key)) {
-            return this._keyStates.get(key);
+    public isButtonDown(code: string): boolean {
+        if(this._keyStates.has(code)) {
+            return this._keyStates.get(code);
         }
 
         return false;
     }
 
-    public wasButtonPressedInFrame(key: string): boolean {
-        if(this._frameButtonPresses.has(key)) {
-            return this._frameButtonPresses.get(key);
+    public wasButtonPressedInFrame(code: string): boolean {
+        if(this._frameButtonPresses.has(code)) {
+            return this._frameButtonPresses.get(code);
         }
 
         return false;

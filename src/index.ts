@@ -1,55 +1,76 @@
-import { ImageLoader } from "./utilities/ImageLoader";
+import { Images } from "./utilities/Images";
 import { FrameCounter } from "./utilities/FrameCounter";
 import { Keyboard } from "./utilities/Keyboard";
 import { EntityComponentSystem } from "./ecs/EntityComponentSystem";
 import * as RenderSystem from "./ecs/systems/RenderSystem";
 import * as MovementSystem from "./ecs/systems/MovementSystem";
+import * as ProjectileSystem from "./ecs/systems/ProjectileSystem";
 import { DimensionsComponent } from "./ecs/components/DimensionsComponent";
 import { Rectangle, Vector } from "./utilities/Trig";
 import { RenderComponent } from "./ecs/components/RenderComponent";
 import { FrameTime } from "./utilities/FrameTime";
 import { VelocityComponent } from "./ecs/components/VelocityComponent";
-import { createProjectile } from "./ecs/EntityFactory";
+import { createProjectile, createShip } from "./ecs/EntityFactory";
 import { SpriteSheetLoader } from "./utilities/SpriteSheetLoader";
+import { IGameContext } from "./GameContext";
+import { ProjectileType } from "./ecs/components/ProjectileComponent";
+import { Timer } from "./utilities/Timer";
+import { LevelProgressManager } from "./Levels";
+import Level1 from "./levels/Level1";
 
-const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-const context = canvas.getContext("2d");
+class GameContext implements IGameContext {
+    public time: FrameTime;
+    public canvas: HTMLCanvasElement;
+    public renderContext: CanvasRenderingContext2D;
+    public viewSize: Rectangle;
+    public readonly images = new Images();
+    public readonly ecs = new EntityComponentSystem();
+}
+
+let levelProgress: LevelProgressManager;
+
+const context = new GameContext();
+const tankId = context.ecs.allocateEntityId();
+context.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+context.renderContext = context.canvas.getContext("2d");
+context.viewSize = new Rectangle(0, 0, context.canvas.width, context.canvas.height);
 
 const frameCounter = new FrameCounter();
-const images = new ImageLoader();
 const keyboard = new Keyboard();
-const ecs = new EntityComponentSystem();
 let lastFrameTime = 0;
 
-const tankId = ecs.allocateEntityId();
-let ships : Array<ImageBitmap>
+const fireTimer = new Timer(200);
 
 async function main() {
+    await initialize();
+
+    const dimensions = new DimensionsComponent(tankId, new Rectangle(10, 10, 12, 16));
+    dimensions.center = {x: 6, y: 8};
+    context.ecs.components.dimensionsComponents.add(dimensions);
+    context.ecs.components.renderComponents.add(new RenderComponent(tankId, context.images.get("ship")));
+    
+    window.requestAnimationFrame(processFrame);
+}
+
+async function initialize() {
     await loadImages();
 
-    const dimensions = new DimensionsComponent(tankId, new Rectangle({x: 10, y: 10}, {width: 12, height: 16}));
-    dimensions.center = {x: 6, y: 8};
-    ecs.components.dimensionsComponents.add(dimensions);
-    ecs.components.renderComponents.add(new RenderComponent(tankId, images.get("ship")));
-
-    window.requestAnimationFrame(processFrame)
+    levelProgress = new LevelProgressManager(Level1);
 }
 
 async function loadImages() {
-    images.add("ship", "gfx/ship.png");
-    images.add("shot", "gfx/shot.png");
-    images.add("shipsheet", "gfx/16ShipCollectionPRE2.png");
-    await images.load();
+    await context.images.load("ship", "gfx/ship.png");
+    await context.images.load("shot", "gfx/shot.png");
+    await context.images.load("shipsheet", "gfx/16ShipCollectionPRE2.png");
 
-    const sheet = images.get("shipsheet");
-    ships = await new SpriteSheetLoader().cutSpriteSheet(sheet, 10, 10);
-    //console.log(sprites);
+    const sheet = context.images.get("shipsheet");
+    const ships = await new SpriteSheetLoader().cutSpriteSheet(sheet, 10, 10);
 }
 
 function processFrame(time: number) {
-    const frameTime = updateFrameTime(time);
+    context.time = updateFrameTime(time);
 
-    update(frameTime);
+    update(context.time);
     render();
 
     frameCounter.frame();
@@ -64,7 +85,18 @@ function updateFrameTime(time: number) {
 }
 
 function update(time: FrameTime) {
-    const dimensions = ecs.components.dimensionsComponents.get(tankId);
+    handleInput(time);
+
+    levelProgress.update(time, context);
+    MovementSystem.update(context);
+    ProjectileSystem.update(context);
+    context.ecs.removeDisposedEntities();
+
+    keyboard.nextFrame();
+}
+
+function handleInput(time: FrameTime) {
+    const dimensions = context.ecs.components.dimensionsComponents.get(tankId);
     let location = dimensions.bounds.location;
 
     if (keyboard.isButtonDown("ArrowLeft")) {
@@ -80,45 +112,21 @@ function update(time: FrameTime) {
         location.y += time.calculateMovement(100);
     }
 
-    if(keyboard.wasButtonPressedInFrame(" ")) {
-        const tankBounds = ecs.components.dimensionsComponents.get(tankId).bounds;
+    if(fireTimer.update(time.currentTime) && keyboard.isButtonDown("Space")) {
+        const tankBounds = context.ecs.components.dimensionsComponents.get(tankId).bounds;
 
-        createProjectile(ecs, images, tankBounds.location, Vector.fromDegreeAngle(-25).multiplyScalar(500));
-        createProjectile(ecs, images, tankBounds.location, Vector.fromDegreeAngle(0).multiplyScalar(500));
-        createProjectile(ecs, images, tankBounds.location, Vector.fromDegreeAngle(25).multiplyScalar(500));
+        //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(-25).multiplyScalar(500), ProjectileType.player);
+        createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(0).multiplyScalar(500), ProjectileType.player);
+        //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(25).multiplyScalar(500), ProjectileType.player);
     }
-
-    MovementSystem.update(time, ecs);
-    ecs.removeDisposedEntities();
-
-    keyboard.nextFrame();
 }
 
 function render() {
-    context.beginPath();
-    context.fillStyle = "black";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.renderContext.beginPath();
+    context.renderContext.fillStyle = "black";
+    context.renderContext.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
-    RenderSystem.render(ecs, context);
-
-    let index = 0;
-    for(let ship of ships) {
-        let x = (index % 10) * 20;
-        let y = Math.floor(index / 10) * 20
-        context.drawImage(ship, index * 20, 10);
-        index++;
-    }   
-    //let tank = images.get("test1");
-
-    // context.drawImage(tank, location.x, location.y);
-
-    // let explosion = images.get("test2");
-
-    // context.drawImage(explosion, 10, 10);
-
-    // for(var i=0; i<10000; i++) {
-    //     context.drawImage(tank, 10, 10);
-    // }
+    RenderSystem.render(context.ecs, context.renderContext);
 }
 
 main();

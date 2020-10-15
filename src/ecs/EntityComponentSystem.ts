@@ -1,4 +1,6 @@
 import { DimensionsComponent } from "./components/DimensionsComponent";
+import { ProjectileComponent } from "./components/ProjectileComponent";
+import { ProjectileTargetComponent } from "./components/ProjectileTargetComponent";
 import { RenderComponent } from "./components/RenderComponent";
 import { VelocityComponent } from "./components/VelocityComponent";
 
@@ -36,7 +38,10 @@ export class ComponentStore {
     public readonly renderComponents = new ComponentList<RenderComponent>();
     public readonly dimensionsComponents = new ComponentList<DimensionsComponent>();
     public readonly velocityComponents = new ComponentList<VelocityComponent>();
-    private readonly _all = [this.renderComponents, this.dimensionsComponents, this.velocityComponents];
+    public readonly projectileComponents = new ComponentList<ProjectileComponent>();
+    public readonly projectileTargetComponents = new ComponentList<ProjectileTargetComponent>();
+    
+    private readonly _all = [this.renderComponents, this.dimensionsComponents, this.velocityComponents, this.projectileComponents, this.projectileTargetComponents];
 
     public removeComponentsForEntity(entityId: EntityId) {
         for(let store of this._all) {
