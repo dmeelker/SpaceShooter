@@ -44,6 +44,10 @@ export class Rectangle {
         return p.x >= this.location.x && p.x < this.location.x + this.size.width &&
             p.y >= this.location.y && p.y < this.location.y + this.size.height;
     }
+
+    public addBorder(size: number): Rectangle {
+        return new Rectangle(this.location.x - size, this.location.y - size, this.size.width + (size * 2), this.size.height + (size * 2));
+    }
 }
 
 export class Vector {

@@ -8,7 +8,7 @@ export enum MovementMode {
 }
 
 export class ComputerControlledShipComponent extends Component {
-    public readonly movementMode: MovementMode
+    public movementMode: MovementMode
     public vector: Vector = Vector.zero;
     public fireTimer = new Timer(2000);
     public path = new Array<Point>();

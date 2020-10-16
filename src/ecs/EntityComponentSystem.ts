@@ -22,6 +22,10 @@ export class ComponentList<TComponent extends Component> {
         return this._components.values();
     }
 
+    public get count(): number {
+        return this._components.size;
+    }
+
     public get(id: EntityId) : TComponent | undefined {
         return this._components.get(id);
     }
