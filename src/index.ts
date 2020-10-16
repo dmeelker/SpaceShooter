@@ -37,7 +37,7 @@ context.renderContext = context.canvas.getContext("2d");
 context.viewSize = new Rectangle(0, 0, context.canvas.width, context.canvas.height);
 
 let levelProgress: LevelProgressManager;
-let starField = new StarField(context.viewSize.size);
+let starFields = [new StarField(context.viewSize.size, 20, 1300), new StarField(context.viewSize.size, 25, 1300), new StarField(context.viewSize.size, 30, 1300)];
 
 const frameCounter = new FrameCounter();
 const keyboard = new Keyboard();
@@ -87,7 +87,7 @@ function updateFrameTime(time: number) {
 function update(time: FrameTime) {
     handleInput(time);
 
-    starField.update(time);
+    starFields.forEach(field => field.update(time));
     levelProgress.update(time, context);
     ShipControllerSystem.update(context);
     MovementSystem.update(context);
@@ -115,6 +115,11 @@ function handleInput(time: FrameTime) {
         location.y += time.calculateMovement(100);
     }
 
+    if(location.x < 0) location.x = 0;
+    if(location.x + dimensions.bounds.size.width > context.viewSize.size.width) location.x = context.viewSize.size.width - dimensions.bounds.size.width;
+    if(location.y < 0) location.y = 0;
+    if(location.y + dimensions.bounds.size.height > context.viewSize.size.height) location.y = context.viewSize.size.height - dimensions.bounds.size.height;
+
     if(fireTimer.update(time.currentTime) && keyboard.isButtonDown("Space")) {
         const tankBounds = context.ecs.components.dimensionsComponents.get(tankId).bounds;
 
@@ -129,7 +134,8 @@ function render() {
     context.renderContext.fillStyle = "black";
     context.renderContext.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
-    starField.render(context.renderContext);
+    starFields.forEach(field => field.render(context.renderContext));
+    //starField.render(context.renderContext);
 
     RenderSystem.render(context.ecs, context.renderContext);
 
