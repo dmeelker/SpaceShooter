@@ -3,8 +3,8 @@ import { Component, EntityId } from "../EntityComponentSystem";
 
 export class DimensionsComponent extends Component {
     public bounds: Rectangle;
-    public scale: Point = {x: 1, y: 1};
-    public center: Point = {x: 0, y: 0};
+    public scale = new Point(1, 1);
+    public center = new Point(0, 0);
     private _rotationInDegrees: number = 0;
     private _rotationInRadians: number = 0;
 

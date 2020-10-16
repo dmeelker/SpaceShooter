@@ -1,7 +1,8 @@
+import { MovementMode } from "./ecs/components/ComputerControlledShipComponent";
 import { createShip } from "./ecs/EntityFactory";
 import { IGameContext } from "./GameContext";
 import { FrameTime } from "./utilities/FrameTime";
-import { Vector } from "./utilities/Trig";
+import { Point, Vector } from "./utilities/Trig";
 
 export type LevelSpec = Array<ILevelWave>;
 
@@ -10,10 +11,17 @@ export interface ILevelWave {
     enemies: Array<ILevelEnemy>
 }
 
+export interface IPoint {
+    x: number;
+    y: number;
+}
+
 export interface ILevelEnemy {
     y: number;
     speed: number;
+    movementMode: MovementMode;
     angle?: number;
+    path?: Array<IPoint>;
 }
 
 export class LevelProgressManager {
@@ -41,7 +49,7 @@ export class LevelProgressManager {
             const angle = enemy.angle ?? 180;
             const vector = Vector.fromDegreeAngle(angle).multiplyScalar(enemy.speed);
 
-            createShip(context.ecs, context.images, location, vector);
+            createShip(context, enemy); // location, vector);
         }
     }
 }

@@ -7,7 +7,7 @@ import * as MovementSystem from "./ecs/systems/MovementSystem";
 import * as ProjectileSystem from "./ecs/systems/ProjectileSystem";
 import * as ShipControllerSystem from "./ecs/systems/ShipControllerSystem";
 import { DimensionsComponent } from "./ecs/components/DimensionsComponent";
-import { Rectangle, Vector } from "./utilities/Trig";
+import { Point, Rectangle, Vector } from "./utilities/Trig";
 import { RenderComponent } from "./ecs/components/RenderComponent";
 import { FrameTime } from "./utilities/FrameTime";
 import { VelocityComponent } from "./ecs/components/VelocityComponent";
@@ -18,6 +18,7 @@ import { ProjectileType } from "./ecs/components/ProjectileComponent";
 import { Timer } from "./utilities/Timer";
 import { LevelProgressManager } from "./Levels";
 import Level1 from "./levels/Level1";
+import { StarField } from "./StarField";
 
 class GameContext implements IGameContext {
     public time: FrameTime;
@@ -27,14 +28,15 @@ class GameContext implements IGameContext {
     public readonly images = new Images();
     public readonly ecs = new EntityComponentSystem();
 }
-
-let levelProgress: LevelProgressManager;
-
 const context = new GameContext();
+
 let tankId: EntityId;
 context.canvas = document.getElementById("canvas") as HTMLCanvasElement;
 context.renderContext = context.canvas.getContext("2d");
 context.viewSize = new Rectangle(0, 0, context.canvas.width, context.canvas.height);
+
+let levelProgress: LevelProgressManager;
+let starField = new StarField(context.viewSize.size);
 
 const frameCounter = new FrameCounter();
 const keyboard = new Keyboard();
@@ -52,7 +54,7 @@ async function initialize() {
     await loadImages();
 
     levelProgress = new LevelProgressManager(Level1);
-    tankId = createPlayerShip(context, {x: 10, y: 10});
+    tankId = createPlayerShip(context, new Point(10, 10));
 }
 
 async function loadImages() {
@@ -84,6 +86,7 @@ function updateFrameTime(time: number) {
 function update(time: FrameTime) {
     handleInput(time);
 
+    starField.update(time);
     levelProgress.update(time, context);
     ShipControllerSystem.update(context);
     MovementSystem.update(context);
@@ -123,6 +126,8 @@ function render() {
     context.renderContext.beginPath();
     context.renderContext.fillStyle = "black";
     context.renderContext.fillRect(0, 0, context.canvas.width, context.canvas.height);
+
+    starField.render(context.renderContext);
 
     RenderSystem.render(context.ecs, context.renderContext);
 

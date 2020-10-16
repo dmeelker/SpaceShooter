@@ -1,6 +1,20 @@
-export interface Point {
-    x: number;
-    y: number;
+// export interface Point {
+//     x: number;
+//     y: number;
+// }
+
+export class Point {
+    constructor(public x: number, public y: number) {
+
+    }
+
+    public static fromVector(vector: Vector): Point {
+        return new Point(vector.x, vector.y);
+    }
+
+    public distanceTo(other: Point): number {
+        return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
+    }
 }
 
 export interface Size {
@@ -13,7 +27,7 @@ export class Rectangle {
     public size: Size;
 
     constructor(x: number, y: number, width: number, height: number) {
-        this.location = {x, y}
+        this.location = new Point(x, y);
         this.size = {width, height};
     }
 

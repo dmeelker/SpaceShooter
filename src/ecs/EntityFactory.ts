@@ -1,4 +1,5 @@
 import { IGameContext } from "../GameContext";
+import { ILevelEnemy } from "../Levels";
 import { Images } from "../utilities/Images";
 import { Point, Rectangle, Vector } from "../utilities/Trig";
 import { ComputerControlledShipComponent, MovementMode } from "./components/ComputerControlledShipComponent";
@@ -14,7 +15,7 @@ export function createPlayerShip(game: IGameContext, location: Point,): EntityId
     const image = game.images.get("ship");
 
     const dimensions = new DimensionsComponent(entityId, new Rectangle(location.x, location.y, 12, 16));
-    dimensions.center = {x: image.width / 2, y: image.height / 2};
+    dimensions.center = new Point(image.width / 2, image.height / 2);
 
     game.ecs.components.dimensionsComponents.add(dimensions);
     game.ecs.components.renderComponents.add(new RenderComponent(entityId, image));
@@ -28,7 +29,7 @@ export function createProjectile(ecs: EntityComponentSystem, images: Images, loc
     const entityId = ecs.allocateEntityId();
 
     const dimensions = new DimensionsComponent(entityId, new Rectangle(location.x, location.y, image.width, image.height));
-    dimensions.center = {x: image.width / 2, y: image.height / 2};
+    dimensions.center = new Point(image.width / 2, image.height / 2);
     dimensions.rotationInDegrees = vector.angleInDegrees;
     
     ecs.components.dimensionsComponents.add(dimensions);
@@ -39,21 +40,30 @@ export function createProjectile(ecs: EntityComponentSystem, images: Images, loc
     return entityId;
 }
 
-export function createShip(ecs: EntityComponentSystem, images: Images, location: Point, vector: Vector): EntityId {
-    const image = images.get("ship");
-    const entityId = ecs.allocateEntityId();
+export function createShip(game: IGameContext, enemy: ILevelEnemy): EntityId {
+    const location = {x: game.viewSize.size.width, y: game.viewSize.size.height * (enemy.y / 100)};
+    const angle = enemy.angle ?? 180;
+    const vector = Vector.fromDegreeAngle(angle).multiplyScalar(enemy.speed);
+
+    const image = game.images.get("ship");
+    const entityId = game.ecs.allocateEntityId();
 
     const dimensions = new DimensionsComponent(entityId, new Rectangle(location.x, location.y, image.width, image.height));
-    dimensions.center = {x: image.width / 2, y: image.height / 2};
+    dimensions.center = new Point(image.width / 2, image.height / 2);
     dimensions.rotationInDegrees = vector.angleInDegrees;
     
-    ecs.components.dimensionsComponents.add(dimensions);
-    ecs.components.renderComponents.add(new RenderComponent(entityId, image));
-    ecs.components.projectileTargetComponents.add(new ProjectileTargetComponent(entityId, 1, ProjectileType.enemy));
+    game.ecs.components.dimensionsComponents.add(dimensions);
+    game.ecs.components.renderComponents.add(new RenderComponent(entityId, image));
+    game.ecs.components.projectileTargetComponents.add(new ProjectileTargetComponent(entityId, 1, ProjectileType.enemy));
 
-    const controlledShip = new ComputerControlledShipComponent(entityId, MovementMode.straightLine);
+    const controlledShip = new ComputerControlledShipComponent(entityId, enemy.movementMode);
     controlledShip.vector = vector;
-    ecs.components.computerControlledShipComponents.add(controlledShip);
+
+    if(enemy.movementMode == MovementMode.path) {
+        controlledShip.path = enemy.path.map(p => new Point(p.x, p.y));
+    }
+
+    game.ecs.components.computerControlledShipComponents.add(controlledShip);
 
     return entityId;
 }
