@@ -10,17 +10,8 @@ export function update(context: IGameContext) {
     for (let ship of context.ecs.components.computerControlledShipComponents.all) {
         const dimensions = context.ecs.components.dimensionsComponents.get(ship.entityId);
 
-        disposeOutOfScreenShip(dimensions, context, ship);
         moveShip(ship, dimensions, context.time, context);
         updateFire(ship, context, dimensions);
-    }
-}
-
-function disposeOutOfScreenShip(dimensions: DimensionsComponent, context: IGameContext, ship: ComputerControlledShipComponent) {
-    const viewSizeWithMargin = context.viewSize.addBorder(50);
-
-    if (!dimensions.bounds.overlaps(viewSizeWithMargin)) {
-        context.ecs.disposeEntity(ship.entityId);
     }
 }
 

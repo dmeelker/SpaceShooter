@@ -6,6 +6,7 @@ import * as RenderSystem from "./ecs/systems/RenderSystem";
 import * as MovementSystem from "./ecs/systems/MovementSystem";
 import * as ProjectileSystem from "./ecs/systems/ProjectileSystem";
 import * as ShipControllerSystem from "./ecs/systems/ShipControllerSystem";
+import * as EntityCleanupSystem from "./ecs/systems/EntityCleanupSystem"
 import { DimensionsComponent } from "./ecs/components/DimensionsComponent";
 import { Point, Rectangle, Vector } from "./utilities/Trig";
 import { RenderComponent } from "./ecs/components/RenderComponent";
@@ -91,6 +92,7 @@ function update(time: FrameTime) {
     ShipControllerSystem.update(context);
     MovementSystem.update(context);
     ProjectileSystem.update(context);
+    EntityCleanupSystem.update(context);
     context.ecs.removeDisposedEntities();
 
     keyboard.nextFrame();

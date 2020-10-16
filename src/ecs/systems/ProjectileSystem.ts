@@ -7,12 +7,7 @@ export function update(context: IGameContext) {
 
     for (let projectile of projectiles) {
         const projectileDimensions = context.ecs.components.dimensionsComponents.get(projectile.entityId).bounds;
-
-        if (!projectileDimensions.overlaps(context.viewSize)) {
-            context.ecs.disposeEntity(projectile.entityId);
-        } else {
-            handleTargetCollisions(context, projectileDimensions, projectile);
-        }
+        handleTargetCollisions(context, projectileDimensions, projectile);
     }
 }
 
