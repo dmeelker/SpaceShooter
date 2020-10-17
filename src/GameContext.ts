@@ -1,7 +1,7 @@
 import { EntityComponentSystem } from "./ecs/EntityComponentSystem";
 import { FrameTime } from "./utilities/FrameTime";
 import { Images } from "./utilities/Images";
-import { Rectangle } from "./utilities/Trig";
+import { Rectangle, Point } from "./utilities/Trig";
 
 export interface IGameContext {
     readonly time: FrameTime;
@@ -10,4 +10,6 @@ export interface IGameContext {
     readonly viewSize: Rectangle;
     readonly images: Images;
     readonly ecs: EntityComponentSystem;
+
+    levelToScreenCoordinates(levelCoordinates: Point): Point;
 }

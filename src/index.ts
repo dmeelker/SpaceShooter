@@ -20,6 +20,7 @@ import { Timer } from "./utilities/Timer";
 import { LevelProgressManager } from "./Levels";
 import Level1 from "./levels/Level1";
 import { StarField } from "./StarField";
+import { EnemyGenerator } from "./ecs/systems/EnemyGenerator";
 
 class GameContext implements IGameContext {
     public time: FrameTime;
@@ -28,7 +29,14 @@ class GameContext implements IGameContext {
     public viewSize: Rectangle;
     public readonly images = new Images();
     public readonly ecs = new EntityComponentSystem();
+
+    public levelToScreenCoordinates(levelCoordinates: Point): Point {
+        return new Point(
+            this.viewSize.size.width * (levelCoordinates.x / 100),
+            this.viewSize.size.height * (levelCoordinates.y / 100))
+    }
 }
+
 const context = new GameContext();
 
 let tankId: EntityId;
@@ -37,13 +45,17 @@ context.renderContext = context.canvas.getContext("2d");
 context.viewSize = new Rectangle(0, 0, context.canvas.width, context.canvas.height);
 
 let levelProgress: LevelProgressManager;
+let enemyGenerator = new EnemyGenerator();
 let starFields = [new StarField(context.viewSize.size, 20, 1300), new StarField(context.viewSize.size, 25, 1300), new StarField(context.viewSize.size, 30, 1300)];
 
 const frameCounter = new FrameCounter();
 const keyboard = new Keyboard();
 let lastFrameTime = 0;
 
+const hpLabel = document.getElementById("hpLabel");
+
 const fireTimer = new Timer(200);
+let shipSpeed = 200;
 
 async function main() {
     await initialize();
@@ -86,9 +98,11 @@ function updateFrameTime(time: number) {
 
 function update(time: FrameTime) {
     handleInput(time);
+    updateUi();
 
     starFields.forEach(field => field.update(time));
-    levelProgress.update(time, context);
+    enemyGenerator.update(context);
+    //levelProgress.update(time, context);
     ShipControllerSystem.update(context);
     MovementSystem.update(context);
     ProjectileSystem.update(context);
@@ -103,16 +117,16 @@ function handleInput(time: FrameTime) {
     let location = dimensions.bounds.location;
 
     if (keyboard.isButtonDown("ArrowLeft")) {
-        location.x -= time.calculateMovement(100);
+        location.x -= time.calculateMovement(shipSpeed);
     }
     if (keyboard.isButtonDown("ArrowRight")) {
-        location.x += time.calculateMovement(100);
+        location.x += time.calculateMovement(shipSpeed);
     }
     if (keyboard.isButtonDown("ArrowUp")) {
-        location.y -= time.calculateMovement(100);
+        location.y -= time.calculateMovement(shipSpeed);
     }
     if (keyboard.isButtonDown("ArrowDown")) {
-        location.y += time.calculateMovement(100);
+        location.y += time.calculateMovement(shipSpeed);
     }
 
     if(location.x < 0) location.x = 0;
@@ -127,6 +141,11 @@ function handleInput(time: FrameTime) {
         createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(0).multiplyScalar(500), ProjectileType.player);
         //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(25).multiplyScalar(500), ProjectileType.player);
     }
+}
+
+function updateUi() {
+    const ship = context.ecs.components.projectileTargetComponents.get(tankId);
+    hpLabel.innerText = ship.hitpoints.toString();
 }
 
 function render() {
