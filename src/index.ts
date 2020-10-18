@@ -7,6 +7,7 @@ import * as MovementSystem from "./ecs/systems/MovementSystem";
 import * as ProjectileSystem from "./ecs/systems/ProjectileSystem";
 import * as ShipControllerSystem from "./ecs/systems/ShipControllerSystem";
 import * as EntityCleanupSystem from "./ecs/systems/EntityCleanupSystem"
+import * as TimedDestroySystem from "./ecs/systems/TimedDestroySystem"
 import { DimensionsComponent } from "./ecs/components/DimensionsComponent";
 import { Point, Rectangle, Vector } from "./utilities/Trig";
 import { RenderComponent } from "./ecs/components/RenderComponent";
@@ -21,6 +22,7 @@ import { LevelProgressManager } from "./Levels";
 import Level1 from "./levels/Level1";
 import { StarField } from "./StarField";
 import { EnemyGenerator } from "./ecs/systems/EnemyGenerator";
+import { AnimationDefinition, AnimationRepository } from "./utilities/Animation";
 
 class GameContext implements IGameContext {
     public time: FrameTime;
@@ -29,6 +31,7 @@ class GameContext implements IGameContext {
     public viewSize: Rectangle;
     public readonly images = new Images();
     public readonly ecs = new EntityComponentSystem();
+    public readonly animations = new AnimationRepository();
 
     public levelToScreenCoordinates(levelCoordinates: Point): Point {
         return new Point(
@@ -44,7 +47,6 @@ context.canvas = document.getElementById("canvas") as HTMLCanvasElement;
 context.renderContext = context.canvas.getContext("2d");
 context.viewSize = new Rectangle(0, 0, context.canvas.width, context.canvas.height);
 
-let levelProgress: LevelProgressManager;
 let enemyGenerator = new EnemyGenerator();
 let starFields = [new StarField(context.viewSize.size, 20, 1300), new StarField(context.viewSize.size, 25, 1300), new StarField(context.viewSize.size, 30, 1300)];
 
@@ -66,17 +68,25 @@ async function main() {
 async function initialize() {
     await loadImages();
 
-    levelProgress = new LevelProgressManager(Level1);
-    tankId = createPlayerShip(context, new Point(10, 10));
+    resetGame();
 }
 
 async function loadImages() {
     await context.images.load("ship", "gfx/ship.png");
     await context.images.load("shot", "gfx/shot.png");
     await context.images.load("shipsheet", "gfx/16ShipCollectionPRE2.png");
+    await context.images.load("explosion", "gfx/explosion.png");
 
-    const sheet = context.images.get("shipsheet");
-    const ships = await new SpriteSheetLoader().cutSpriteSheet(sheet, 10, 10);
+    const explosionImage = context.images.get("explosion");
+    const explosionFrames = await new SpriteSheetLoader().cutSpriteSheet(explosionImage, 6, 1);
+
+    context.animations.add("explosion", new AnimationDefinition(explosionFrames, 50));
+}
+
+function resetGame() {
+    context.ecs.clear();
+    enemyGenerator = new EnemyGenerator();
+    tankId = createPlayerShip(context, new Point(10, 10));
 }
 
 function processFrame(time: number) {
@@ -97,6 +107,7 @@ function updateFrameTime(time: number) {
 }
 
 function update(time: FrameTime) {
+    checkPlayerDestroyed();
     handleInput(time);
     updateUi();
 
@@ -106,10 +117,19 @@ function update(time: FrameTime) {
     ShipControllerSystem.update(context);
     MovementSystem.update(context);
     ProjectileSystem.update(context);
+    TimedDestroySystem.update(context);
     EntityCleanupSystem.update(context);
     context.ecs.removeDisposedEntities();
 
     keyboard.nextFrame();
+}
+
+function checkPlayerDestroyed() {
+    const dimensions = context.ecs.components.dimensionsComponents.get(tankId);
+
+    if(dimensions == undefined) {
+        resetGame();
+    }
 }
 
 function handleInput(time: FrameTime) {

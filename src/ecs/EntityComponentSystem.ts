@@ -3,6 +3,7 @@ import { DimensionsComponent } from "./components/DimensionsComponent";
 import { ProjectileComponent } from "./components/ProjectileComponent";
 import { ProjectileTargetComponent } from "./components/ProjectileTargetComponent";
 import { RenderComponent } from "./components/RenderComponent";
+import { TimedDestroyComponent } from "./components/TimedDestroyComponent";
 import { VelocityComponent } from "./components/VelocityComponent";
 
 export type EntityId = number;
@@ -37,6 +38,10 @@ export class ComponentList<TComponent extends Component> {
     public remove(id: EntityId) {
         return this._components.delete(id);
     }
+
+    public clear() {
+        this._components.clear();
+    }
 }
 
 export class ComponentStore {
@@ -46,13 +51,23 @@ export class ComponentStore {
     public readonly projectileComponents = new ComponentList<ProjectileComponent>();
     public readonly projectileTargetComponents = new ComponentList<ProjectileTargetComponent>();
     public readonly computerControlledShipComponents = new ComponentList<ComputerControlledShipComponent>();
-    
-    private readonly _all = [this.renderComponents, this.dimensionsComponents, this.velocityComponents, this.projectileComponents, this.projectileTargetComponents, this.computerControlledShipComponents];
+    public readonly timedDestroyComponents = new ComponentList<TimedDestroyComponent>();
+
+    private readonly _all = [
+        this.renderComponents, 
+        this.dimensionsComponents, 
+        this.velocityComponents, 
+        this.projectileComponents, 
+        this.projectileTargetComponents, 
+        this.computerControlledShipComponents, 
+        this.timedDestroyComponents];
 
     public removeComponentsForEntity(entityId: EntityId) {
-        for(let store of this._all) {
-            store.remove(entityId);
-        }
+        this._all.forEach(store => store.remove(entityId));
+    }
+
+    public clear() {
+        this._all.forEach(store => store.clear());
     }
 }
 
@@ -60,8 +75,12 @@ export class EntityComponentSystem {
     public readonly components = new ComponentStore();
     public readonly entities = new Set<EntityId>();
     private _lastEntityId: EntityId = 0;
-    private readonly _availableEntityIds = new Array<EntityId>();
-    private readonly _disposableEntityIds = new Array<EntityId>();
+    private _availableEntityIds = new Array<EntityId>();
+    private _disposableEntityIds = new Array<EntityId>();
+
+    public constructor() {
+        this.clear();
+    }
 
     public allocateEntityId(): EntityId {
         if (this._availableEntityIds.length > 0) {
@@ -88,5 +107,13 @@ export class EntityComponentSystem {
             this.freeEntityId(id);
             this.components.removeComponentsForEntity(id);
         }
+    }
+
+    public clear() {
+        this.components.clear();
+        this.entities.clear();
+        this._availableEntityIds = [];
+        this._disposableEntityIds = [];
+        this._lastEntityId = 0;
     }
 }

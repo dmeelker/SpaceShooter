@@ -1,10 +1,11 @@
 export class Images {
     private readonly _images = new Map<string, ImageBitmap>();
 
-    public async load(code: string, url: string) {
+    public async load(code: string, url: string) : Promise<ImageBitmap> {
         const image = await this.loadImage(url);
 
         this.add(code, image);
+        return image;
     }
 
     private loadImage(url: string): Promise<ImageBitmap> {

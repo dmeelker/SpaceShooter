@@ -1,6 +1,7 @@
 import { IGameContext } from "../../GameContext";
 import { Rectangle } from "../../utilities/Trig";
 import { ProjectileComponent } from "../components/ProjectileComponent";
+import { createExplosion } from "../EntityFactory";
 
 export function update(context: IGameContext) {
     const projectiles = context.ecs.components.projectileComponents.all;
@@ -19,6 +20,7 @@ function handleTargetCollisions(context: IGameContext, projectileDimensions: Rec
             target.hitpoints -= projectile.power;
 
             if (target.hitpoints <= 0) {
+                createExplosion(context, targetDimensions.location);
                 context.ecs.disposeEntity(target.entityId);
             }
 
