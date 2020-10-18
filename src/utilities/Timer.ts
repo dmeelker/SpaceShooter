@@ -14,7 +14,7 @@ export class Timer {
 
         const timeElapsed = time - this._lastTime;
         if(timeElapsed > this.interval) {
-            this._lastTime += this.interval;
+            this._lastTime = time;
             return true;
         } else {
             return false;

@@ -18,6 +18,7 @@ function handleTargetCollisions(context: IGameContext, projectileDimensions: Rec
 
         if (projectile.source != target.type && projectileDimensions.overlaps(targetDimensions)) {
             target.hitpoints -= projectile.power;
+            target.lastHitTime = context.time.currentTime;
 
             if (target.hitpoints <= 0) {
                 createExplosion(context, targetDimensions.location);
