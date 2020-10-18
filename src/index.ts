@@ -67,6 +67,7 @@ async function main() {
 
 async function initialize() {
     await loadImages();
+    setupAnimations();
 
     resetGame();
 }
@@ -76,11 +77,17 @@ async function loadImages() {
     await context.images.load("shot", "gfx/shot.png");
     await context.images.load("shipsheet", "gfx/16ShipCollectionPRE2.png");
     await context.images.load("explosion", "gfx/explosion.png");
+}
 
-    const explosionImage = context.images.get("explosion");
-    const explosionFrames = await new SpriteSheetLoader().cutSpriteSheet(explosionImage, 6, 1);
+async function setupAnimations() {
+    await createAnimationFromImage("explosion", 6, 1, 50);
+}
 
-    context.animations.add("explosion", new AnimationDefinition(explosionFrames, 50));
+async function createAnimationFromImage(code: string, horizontalSprites: number, verticalSprites: number, animationSpeed: number) {
+    const image = context.images.get(code);
+    const frames = await new SpriteSheetLoader().cutSpriteSheet(image, horizontalSprites, verticalSprites);
+
+    context.animations.add(code, new AnimationDefinition(frames, animationSpeed));
 }
 
 function resetGame() {
