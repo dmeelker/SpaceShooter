@@ -1,9 +1,9 @@
-import { IGameContext } from "../../../GameContext";
-import { Point, Vector } from "../../../utilities/Trig";
-import { createShip, IEnemyDescription } from "../EntityFactory";
-import { MovementMode } from "../components/ComputerControlledShipComponent";
-import { Timer } from "../../../utilities/Timer";
-import { randomArrayElement, randomInt } from "../../../utilities/Random";
+import { IGameContext } from "../GameContext";
+import { Point, Vector } from "../utilities/Trig";
+import { createShip, IEnemyDescription } from "./ecs/EntityFactory";
+import { MovementMode } from "./ecs/components/ComputerControlledShipComponent";
+import { Timer } from "../utilities/Timer";
+import { randomArrayElement, randomInt } from "../utilities/Random";
 
 type WaveGenerator = (startTime: Number, game: IGameContext) => Array<EnemySpawn>;
 
@@ -86,10 +86,10 @@ export class EnemyGenerator {
     }
 
     private generateDiagonalLineWave(startTime: number, game: IGameContext) : Array<EnemySpawn> {
-        const verticalSide = randomInt(0, 2);
-        const startLocation = new Point(100, verticalSide == 0 ? 10 : 90);
+        const centerOffset = randomArrayElement([-1, 1]);
+        const startLocation = new Point(100,  50 + (centerOffset * 40));
         const speed = this.interpolateWithDifficulty(100, 50);
-        const vector = Vector.fromDegreeAngle(verticalSide == 0 ? 160 : 210).multiplyScalar(speed);
+        const vector = Vector.fromDegreeAngle(180 + (centerOffset * 16)).multiplyScalar(speed);
 
         return this.generateLineWave(startTime, game, startLocation, vector)
     }

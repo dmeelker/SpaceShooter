@@ -10,13 +10,13 @@ import * as EntityCleanupSystem from "./game/ecs/systems/EntityCleanupSystem"
 import * as TimedDestroySystem from "./game/ecs/systems/TimedDestroySystem"
 import { Point, Rectangle, Vector } from "./utilities/Trig";
 import { FrameTime } from "./utilities/FrameTime";
-import { createPlayerShip, createProjectile } from "./game/ecs/EntityFactory";
+import { createAsteroid, createPlayerShip, createProjectile } from "./game/ecs/EntityFactory";
 import { SpriteSheetLoader } from "./utilities/SpriteSheetLoader";
 import { IGameContext } from "./GameContext";
 import { ProjectileType } from "./game/ecs/components/ProjectileComponent";
 import { Timer } from "./utilities/Timer";
 import { StarField } from "./game/StarField";
-import { EnemyGenerator } from "./game/ecs/systems/EnemyGenerator";
+import { EnemyGenerator } from "./game/EnemyGenerator";
 import { AnimationDefinition, AnimationRepository } from "./utilities/Animation";
 import { PlayerScore } from "./game/PlayerScore";
 
@@ -78,6 +78,7 @@ async function loadImages() {
     await context.images.load("ship", "gfx/ship.png");
     await context.images.load("shot", "gfx/shot.png");
     await context.images.load("explosion", "gfx/explosion.png");
+    await context.images.load("asteroid", "gfx/asteroid.png");
 }
 
 async function setupAnimations() {
@@ -96,6 +97,8 @@ function resetGame() {
     context.score.reset();
     enemyGenerator = new EnemyGenerator();
     playerShipId = createPlayerShip(context, context.levelToScreenCoordinates(new Point(5, 50)));
+
+    createAsteroid(context, context.levelToScreenCoordinates(new Point(100, 50)));
 }
 
 function processFrame(time: number) {

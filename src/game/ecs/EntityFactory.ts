@@ -90,3 +90,19 @@ export function createShip(game: IGameContext, enemy: IEnemyDescription): Entity
 
     return entityId;
 }
+
+export function createAsteroid(game: IGameContext, location: Point) {
+    const image = game.images.get("asteroid");
+    const entityId = game.ecs.allocateEntityId();
+
+    const dimensions = new DimensionsComponent(entityId, new Rectangle(location.x, location.y, image.width, image.height));
+    dimensions.center = new Point(image.width / 2, image.height / 2);
+    dimensions.rotationInDegrees = 0;
+    
+    game.ecs.components.dimensionsComponents.add(dimensions);
+    game.ecs.components.velocityComponents.add(new VelocityComponent(entityId, Vector.fromDegreeAngle(180).multiplyScalar(20)));
+    game.ecs.components.projectileTargetComponents.add(new ProjectileTargetComponent(entityId, 10, ProjectileType.enemy));
+    game.ecs.components.renderComponents.add(new RenderComponent(entityId, new StaticImageProvider(image)));
+
+    return entityId;
+}
