@@ -18,3 +18,5 @@ jobs:
       run: npm install
     - name: Run build task
       run: npx webpack 
+    - name: Copy additional resources
+      run: cp index.html dist/ && cp -R gfx/ dist/
