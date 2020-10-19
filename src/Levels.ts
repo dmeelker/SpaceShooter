@@ -49,7 +49,7 @@ export class LevelProgressManager {
             const angle = enemy.angle ?? 180;
             const vector = Vector.fromDegreeAngle(angle).multiplyScalar(enemy.speed);
 
-            createShip(context, enemy); // location, vector);
+            // createShip(context, enemy); // location, vector);
         }
     }
 }

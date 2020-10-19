@@ -15,11 +15,14 @@ export class StarField {
     private readonly _columnCount: number;
 
     private _columns = new Array<Array<Star>>();
-    private readonly _movementSpeed = 30;
+    private readonly _movementSpeed: number;
+    private readonly _density: number;
     private _xOffset = 0;
 
-    constructor(size: Size) {
+    constructor(size: Size, speed: number, density: number) {
         this._size = size;
+        this._movementSpeed = speed;
+        this._density = density;
         this._columnCount = (this._size.width / columnWidth) + 1;
 
         for(let i=0; i<this._columnCount; i++) {
@@ -39,7 +42,7 @@ export class StarField {
 
     private generateStarColumn(): Array<Star> {
         const stars = new Array<Star>();
-        const starCount = (columnWidth * this._size.height) / 500;
+        const starCount = (columnWidth * this._size.height) / this._density;
 
         for(let i=0; i<starCount; i++) {
             const x = randomInt(0, columnWidth);
