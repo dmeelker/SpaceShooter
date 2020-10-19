@@ -1,6 +1,7 @@
 import { IGameContext } from "../../../GameContext";
 import { Rectangle } from "../../../utilities/Trig";
-import { ProjectileComponent } from "../components/ProjectileComponent";
+import { ProjectileComponent, ProjectileType } from "../components/ProjectileComponent";
+import { ProjectileTargetComponent } from "../components/ProjectileTargetComponent";
 import { createExplosion } from "../EntityFactory";
 
 export function update(context: IGameContext) {
@@ -21,11 +22,19 @@ function handleTargetCollisions(context: IGameContext, projectileDimensions: Rec
             target.lastHitTime = context.time.currentTime;
 
             if (target.hitpoints <= 0) {
-                createExplosion(context, targetDimensions.location);
-                context.ecs.disposeEntity(target.entityId);
+                destroyShip(context, targetDimensions, target);
             }
 
             context.ecs.disposeEntity(projectile.entityId);
         }
     }
 }
+function destroyShip(context: IGameContext, targetDimensions: Rectangle, target: ProjectileTargetComponent) {
+    createExplosion(context, targetDimensions.location);
+    context.ecs.disposeEntity(target.entityId);
+
+    if (target.type == ProjectileType.enemy) {
+        context.score.add(10);
+    }
+}
+

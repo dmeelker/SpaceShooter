@@ -1,4 +1,5 @@
 import { EntityComponentSystem } from "./game/ecs/EntityComponentSystem";
+import { PlayerScore } from "./game/PlayerScore";
 import { AnimationRepository } from "./utilities/Animation";
 import { FrameTime } from "./utilities/FrameTime";
 import { Images } from "./utilities/Images";
@@ -12,6 +13,7 @@ export interface IGameContext {
     readonly images: Images;
     readonly ecs: EntityComponentSystem;
     readonly animations: AnimationRepository;
+    readonly score: PlayerScore;
 
     levelToScreenCoordinates(levelCoordinates: Point): Point;
 }

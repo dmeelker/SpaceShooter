@@ -18,6 +18,7 @@ import { Timer } from "./utilities/Timer";
 import { StarField } from "./game/StarField";
 import { EnemyGenerator } from "./game/ecs/systems/EnemyGenerator";
 import { AnimationDefinition, AnimationRepository } from "./utilities/Animation";
+import { PlayerScore } from "./game/PlayerScore";
 
 class GameContext implements IGameContext {
     public time: FrameTime;
@@ -27,6 +28,7 @@ class GameContext implements IGameContext {
     public readonly images = new Images();
     public readonly ecs = new EntityComponentSystem();
     public readonly animations = new AnimationRepository();
+    public readonly score = new PlayerScore();
 
     public levelToScreenCoordinates(levelCoordinates: Point): Point {
         return new Point(
@@ -91,6 +93,7 @@ async function createAnimationFromImage(code: string, horizontalSprites: number,
 
 function resetGame() {
     context.ecs.clear();
+    context.score.reset();
     enemyGenerator = new EnemyGenerator();
     playerShipId = createPlayerShip(context, context.levelToScreenCoordinates(new Point(5, 50)));
 }
@@ -171,7 +174,7 @@ function handleInput(time: FrameTime) {
 
 function updateUi() {
     const ship = context.ecs.components.projectileTargetComponents.get(playerShipId);
-    hpLabel.innerText = ship.hitpoints.toString();
+    hpLabel.innerText = `HP: ${ship.hitpoints.toString()} Score: ${context.score.points}`;
 }
 
 function render() {
