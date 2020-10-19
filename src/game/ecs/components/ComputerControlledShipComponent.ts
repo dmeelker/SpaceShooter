@@ -1,5 +1,5 @@
-import { Timer } from "../../utilities/Timer";
-import { Point, Vector } from "../../utilities/Trig";
+import { Timer } from "../../../utilities/Timer";
+import { Point, Vector } from "../../../utilities/Trig";
 import { Component, EntityId } from "../EntityComponentSystem";
 
 export enum MovementMode {

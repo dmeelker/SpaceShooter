@@ -1,4 +1,4 @@
-import { Vector } from "../../utilities/Trig";
+import { Vector } from "../../../utilities/Trig";
 import { Component, EntityId } from "../EntityComponentSystem";
 
 export class VelocityComponent extends Component {

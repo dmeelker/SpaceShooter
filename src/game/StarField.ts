@@ -1,6 +1,6 @@
-import { FrameTime } from "./utilities/FrameTime";
-import { randomArrayIndex, randomInt } from "./utilities/Random";
-import { Point, Size } from "./utilities/Trig";
+import { FrameTime } from "../utilities/FrameTime";
+import { randomArrayIndex, randomInt } from "../utilities/Random";
+import { Point, Size } from "../utilities/Trig";
 
 class Star {
     public location: Point;

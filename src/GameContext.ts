@@ -1,4 +1,4 @@
-import { EntityComponentSystem } from "./ecs/EntityComponentSystem";
+import { EntityComponentSystem } from "./game/ecs/EntityComponentSystem";
 import { AnimationRepository } from "./utilities/Animation";
 import { FrameTime } from "./utilities/FrameTime";
 import { Images } from "./utilities/Images";

@@ -1,7 +1,7 @@
-import { IGameContext } from "../GameContext";
-import { AnimationInstance } from "../utilities/Animation";
-import { Images } from "../utilities/Images";
-import { Point, Rectangle, Vector } from "../utilities/Trig";
+import { IGameContext } from "../../GameContext";
+import { AnimationInstance } from "../../utilities/Animation";
+import { Images } from "../../utilities/Images";
+import { Point, Rectangle, Vector } from "../../utilities/Trig";
 import { ComputerControlledShipComponent, MovementMode } from "./components/ComputerControlledShipComponent";
 import { DimensionsComponent } from "./components/DimensionsComponent";
 import { ProjectileComponent, ProjectileType } from "./components/ProjectileComponent";

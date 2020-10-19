@@ -1,22 +1,22 @@
 import { Images } from "./utilities/Images";
 import { FrameCounter } from "./utilities/FrameCounter";
 import { Keyboard } from "./utilities/Keyboard";
-import { EntityComponentSystem, EntityId } from "./ecs/EntityComponentSystem";
-import * as RenderSystem from "./ecs/systems/RenderSystem";
-import * as MovementSystem from "./ecs/systems/MovementSystem";
-import * as ProjectileSystem from "./ecs/systems/ProjectileSystem";
-import * as ShipControllerSystem from "./ecs/systems/ShipControllerSystem";
-import * as EntityCleanupSystem from "./ecs/systems/EntityCleanupSystem"
-import * as TimedDestroySystem from "./ecs/systems/TimedDestroySystem"
+import { EntityComponentSystem, EntityId } from "./game/ecs/EntityComponentSystem";
+import * as RenderSystem from "./game/ecs/systems/RenderSystem";
+import * as MovementSystem from "./game/ecs/systems/MovementSystem";
+import * as ProjectileSystem from "./game/ecs/systems/ProjectileSystem";
+import * as ShipControllerSystem from "./game/ecs/systems/ShipControllerSystem";
+import * as EntityCleanupSystem from "./game/ecs/systems/EntityCleanupSystem"
+import * as TimedDestroySystem from "./game/ecs/systems/TimedDestroySystem"
 import { Point, Rectangle, Vector } from "./utilities/Trig";
 import { FrameTime } from "./utilities/FrameTime";
-import { createPlayerShip, createProjectile } from "./ecs/EntityFactory";
+import { createPlayerShip, createProjectile } from "./game/ecs/EntityFactory";
 import { SpriteSheetLoader } from "./utilities/SpriteSheetLoader";
 import { IGameContext } from "./GameContext";
-import { ProjectileType } from "./ecs/components/ProjectileComponent";
+import { ProjectileType } from "./game/ecs/components/ProjectileComponent";
 import { Timer } from "./utilities/Timer";
-import { StarField } from "./StarField";
-import { EnemyGenerator } from "./ecs/systems/EnemyGenerator";
+import { StarField } from "./game/StarField";
+import { EnemyGenerator } from "./game/ecs/systems/EnemyGenerator";
 import { AnimationDefinition, AnimationRepository } from "./utilities/Animation";
 
 class GameContext implements IGameContext {

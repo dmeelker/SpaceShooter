@@ -1,4 +1,4 @@
-import { degreesToRadians, Point, Rectangle } from "../../utilities/Trig";
+import { degreesToRadians, Point, Rectangle } from "../../../utilities/Trig";
 import { Component, EntityId } from "../EntityComponentSystem";
 
 export class DimensionsComponent extends Component {

@@ -1,4 +1,4 @@
-import { IGameContext } from "../../GameContext";
+import { IGameContext } from "../../../GameContext";
 
 export function update(context: IGameContext) {
     const viewSizeWithMargin = context.viewSize.addBorder(50);

@@ -1,4 +1,4 @@
-import { IImageProvider } from "../ecs/components/RenderComponent";
+import { IImageProvider } from "../game/ecs/components/RenderComponent";
 
 export class AnimationDefinition {
     public readonly frames: Array<ImageBitmap>;

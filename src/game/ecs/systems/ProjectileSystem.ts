@@ -1,5 +1,5 @@
-import { IGameContext } from "../../GameContext";
-import { Rectangle } from "../../utilities/Trig";
+import { IGameContext } from "../../../GameContext";
+import { Rectangle } from "../../../utilities/Trig";
 import { ProjectileComponent } from "../components/ProjectileComponent";
 import { createExplosion } from "../EntityFactory";
 

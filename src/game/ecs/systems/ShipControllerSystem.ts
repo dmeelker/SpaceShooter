@@ -1,6 +1,6 @@
-import { IGameContext } from "../../GameContext";
-import { FrameTime } from "../../utilities/FrameTime";
-import { Point, Vector } from "../../utilities/Trig";
+import { IGameContext } from "../../../GameContext";
+import { FrameTime } from "../../../utilities/FrameTime";
+import { Point, Vector } from "../../../utilities/Trig";
 import { ComputerControlledShipComponent, MovementMode } from "../components/ComputerControlledShipComponent";
 import { DimensionsComponent } from "../components/DimensionsComponent";
 import { ProjectileType } from "../components/ProjectileComponent";

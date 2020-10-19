@@ -1,9 +1,9 @@
-import { IGameContext } from "../../GameContext";
-import { Point, Vector } from "../../utilities/Trig";
+import { IGameContext } from "../../../GameContext";
+import { Point, Vector } from "../../../utilities/Trig";
 import { createShip, IEnemyDescription } from "../EntityFactory";
 import { MovementMode } from "../components/ComputerControlledShipComponent";
-import { Timer } from "../../utilities/Timer";
-import { randomArrayElement, randomInt } from "../../utilities/Random";
+import { Timer } from "../../../utilities/Timer";
+import { randomArrayElement, randomInt } from "../../../utilities/Random";
 
 type WaveGenerator = (startTime: Number, game: IGameContext) => Array<EnemySpawn>;
 
