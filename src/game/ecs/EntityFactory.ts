@@ -7,6 +7,7 @@ import { DimensionsComponent } from "./components/DimensionsComponent";
 import { ProjectileComponent, ProjectileType } from "./components/ProjectileComponent";
 import { ProjectileTargetComponent } from "./components/ProjectileTargetComponent";
 import { RenderComponent, StaticImageProvider } from "./components/RenderComponent";
+import { SeekingTargetComponent } from "./components/SeekingTargetComponent";
 import { TimedDestroyComponent } from "./components/TimedDestroyComponent";
 import { VelocityComponent } from "./components/VelocityComponent";
 import { EntityComponentSystem, EntityId } from "./EntityComponentSystem";
@@ -25,19 +26,23 @@ export function createPlayerShip(game: IGameContext, location: Point,): EntityId
     return entityId;
 }
 
-export function createProjectile(ecs: EntityComponentSystem, images: Images, location: Point, vector: Vector, type: ProjectileType): EntityId {
-    const image = images.get("shot");
-    const entityId = ecs.allocateEntityId();
+export function createProjectile(game: IGameContext, location: Point, vector: Vector, type: ProjectileType): EntityId {
+    const image = game.images.get("shot");
+    const entityId = game.ecs.allocateEntityId();
 
     const dimensions = new DimensionsComponent(entityId, new Rectangle(location.x, location.y, image.width, image.height));
     dimensions.center = new Point(image.width / 2, image.height / 2);
     dimensions.rotationInDegrees = vector.angleInDegrees;
     
-    ecs.components.dimensionsComponents.add(dimensions);
-    ecs.components.renderComponents.add(new RenderComponent(entityId, new StaticImageProvider(image)));
-    ecs.components.velocityComponents.add(new VelocityComponent(entityId, vector));
-    ecs.components.projectileComponents.add(new ProjectileComponent(entityId, 1, type));
-
+    game.ecs.components.dimensionsComponents.add(dimensions);
+    game.ecs.components.renderComponents.add(new RenderComponent(entityId, new StaticImageProvider(image)));
+    game.ecs.components.projectileComponents.add(new ProjectileComponent(entityId, 1, type));
+    
+    if(type == ProjectileType.enemy) {
+        game.ecs.components.seekingTargetComponents.add(new SeekingTargetComponent(entityId, game.playerId));
+    } else {
+        game.ecs.components.velocityComponents.add(new VelocityComponent(entityId, vector));
+    }
     return entityId;
 }
 

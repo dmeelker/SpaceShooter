@@ -33,7 +33,7 @@ export class StarField {
     public update(time: FrameTime) {
         this._xOffset -= time.calculateMovement(this._movementSpeed);
 
-        if(this._xOffset < -columnWidth) {
+        while(this._xOffset < -columnWidth) {
             this._columns = this._columns.splice(1);
             this._columns.push(this.generateStarColumn());
             this._xOffset += columnWidth;

@@ -3,6 +3,7 @@ import { DimensionsComponent } from "./components/DimensionsComponent";
 import { ProjectileComponent } from "./components/ProjectileComponent";
 import { ProjectileTargetComponent } from "./components/ProjectileTargetComponent";
 import { RenderComponent } from "./components/RenderComponent";
+import { SeekingTargetComponent } from "./components/SeekingTargetComponent";
 import { TimedDestroyComponent } from "./components/TimedDestroyComponent";
 import { VelocityComponent } from "./components/VelocityComponent";
 
@@ -52,6 +53,7 @@ export class ComponentStore {
     public readonly projectileTargetComponents = new ComponentList<ProjectileTargetComponent>();
     public readonly computerControlledShipComponents = new ComponentList<ComputerControlledShipComponent>();
     public readonly timedDestroyComponents = new ComponentList<TimedDestroyComponent>();
+    public readonly seekingTargetComponents = new ComponentList<SeekingTargetComponent>();
 
     private readonly _all = [
         this.renderComponents, 
@@ -60,7 +62,8 @@ export class ComponentStore {
         this.projectileComponents, 
         this.projectileTargetComponents, 
         this.computerControlledShipComponents, 
-        this.timedDestroyComponents];
+        this.timedDestroyComponents,
+        this.seekingTargetComponents];
 
     public removeComponentsForEntity(entityId: EntityId) {
         this._all.forEach(store => store.remove(entityId));

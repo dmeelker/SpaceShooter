@@ -8,6 +8,7 @@ import * as ProjectileSystem from "./game/ecs/systems/ProjectileSystem";
 import * as ShipControllerSystem from "./game/ecs/systems/ShipControllerSystem";
 import * as EntityCleanupSystem from "./game/ecs/systems/EntityCleanupSystem"
 import * as TimedDestroySystem from "./game/ecs/systems/TimedDestroySystem"
+import * as SeekingTargetSystem from "./game/ecs/systems/SeekingTargetSystem"
 import { Point, Rectangle, Vector } from "./utilities/Trig";
 import { FrameTime } from "./utilities/FrameTime";
 import { createAsteroid, createPlayerShip, createProjectile } from "./game/ecs/EntityFactory";
@@ -28,6 +29,7 @@ class GameContext implements IGameContext {
     public readonly images = new Images();
     public readonly ecs = new EntityComponentSystem();
     public readonly animations = new AnimationRepository();
+    public playerId: EntityId;
     public readonly score = new PlayerScore();
 
     public levelToScreenCoordinates(levelCoordinates: Point): Point {
@@ -44,7 +46,6 @@ const keyboard = new Keyboard();
 let enemyGenerator: EnemyGenerator;
 let starFields : Array<StarField>;
 
-let playerShipId: EntityId;
 let shipSpeed = 200;
 const fireTimer = new Timer(200);
 
@@ -96,7 +97,7 @@ function resetGame() {
     context.ecs.clear();
     context.score.reset();
     enemyGenerator = new EnemyGenerator();
-    playerShipId = createPlayerShip(context, context.levelToScreenCoordinates(new Point(5, 50)));
+    context.playerId = createPlayerShip(context, context.levelToScreenCoordinates(new Point(5, 50)));
 
     createAsteroid(context, context.levelToScreenCoordinates(new Point(100, 50)));
 }
@@ -129,6 +130,7 @@ function update(time: FrameTime) {
     ShipControllerSystem.update(context);
     MovementSystem.update(context);
     ProjectileSystem.update(context);
+    SeekingTargetSystem.update(context);
     TimedDestroySystem.update(context);
     EntityCleanupSystem.update(context);
     context.ecs.removeDisposedEntities();
@@ -137,7 +139,7 @@ function update(time: FrameTime) {
 }
 
 function checkPlayerDestroyed() {
-    const dimensions = context.ecs.components.dimensionsComponents.get(playerShipId);
+    const dimensions = context.ecs.components.dimensionsComponents.get(context.playerId);
 
     if(dimensions == undefined) {
         resetGame();
@@ -145,7 +147,7 @@ function checkPlayerDestroyed() {
 }
 
 function handleInput(time: FrameTime) {
-    const dimensions = context.ecs.components.dimensionsComponents.get(playerShipId);
+    const dimensions = context.ecs.components.dimensionsComponents.get(context.playerId);
     let location = dimensions.bounds.location;
 
     if (keyboard.isButtonDown("ArrowLeft")) {
@@ -167,16 +169,16 @@ function handleInput(time: FrameTime) {
     if(location.y + dimensions.bounds.size.height > context.viewSize.size.height) location.y = context.viewSize.size.height - dimensions.bounds.size.height;
 
     if((fireTimer.update(time.currentTime) && keyboard.isButtonDown("Space")) || keyboard.wasButtonPressedInFrame("Space")) {
-        const tankBounds = context.ecs.components.dimensionsComponents.get(playerShipId).bounds;
+        const tankBounds = context.ecs.components.dimensionsComponents.get(context.playerId).bounds;
 
         //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(-25).multiplyScalar(500), ProjectileType.player);
-        createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(0).multiplyScalar(500), ProjectileType.player);
+        createProjectile(context, tankBounds.location, Vector.fromDegreeAngle(0).multiplyScalar(500), ProjectileType.player);
         //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(25).multiplyScalar(500), ProjectileType.player);
     }
 }
 
 function updateUi() {
-    const ship = context.ecs.components.projectileTargetComponents.get(playerShipId);
+    const ship = context.ecs.components.projectileTargetComponents.get(context.playerId);
     hpLabel.innerText = `HP: ${ship.hitpoints.toString()} Score: ${context.score.points}`;
 }
 

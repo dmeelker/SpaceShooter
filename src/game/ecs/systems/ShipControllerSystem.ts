@@ -19,7 +19,7 @@ function updateFire(ship: ComputerControlledShipComponent, context: IGameContext
     if (ship.fireTimer.update(context.time.currentTime)) {
         const tankBounds = dimensions.bounds;
 
-        createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(dimensions.rotationInDegrees).multiplyScalar(200), ProjectileType.enemy);
+        createProjectile(context, tankBounds.location, Vector.fromDegreeAngle(dimensions.rotationInDegrees).multiplyScalar(200), ProjectileType.enemy);
     }
 }
 
