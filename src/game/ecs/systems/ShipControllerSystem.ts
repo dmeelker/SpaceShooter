@@ -1,6 +1,6 @@
 import { IGameContext } from "../../../GameContext";
 import { FrameTime } from "../../../utilities/FrameTime";
-import { Point, Vector } from "../../../utilities/Trig";
+import { normalizeDegrees, Point, Vector } from "../../../utilities/Trig";
 import { ComputerControlledShipComponent, MovementMode } from "../components/ComputerControlledShipComponent";
 import { DimensionsComponent } from "../components/DimensionsComponent";
 import { ProjectileType } from "../components/ProjectileComponent";
@@ -17,9 +17,16 @@ export function update(context: IGameContext) {
 
 function updateFire(ship: ComputerControlledShipComponent, context: IGameContext, dimensions: DimensionsComponent) {
     if (ship.fireTimer.update(context.time.currentTime)) {
-        const tankBounds = dimensions.bounds;
+        const shipLocation = dimensions.centerLocation;
+        const targetLocation = context.ecs.components.dimensionsComponents.get(context.playerId).centerLocation;
+        const vectorToTarget = targetLocation.toVector().subtract(shipLocation.toVector());
 
-        createProjectile(context, tankBounds.location, Vector.fromDegreeAngle(dimensions.rotationInDegrees).multiplyScalar(200), ProjectileType.enemy);
+        const shipHeading = normalizeDegrees(dimensions.rotationInDegrees);
+        const headingToTarget = normalizeDegrees(vectorToTarget.angleInDegrees);
+
+        if(Math.abs(shipHeading - headingToTarget) < 90) {
+            createProjectile(context, shipLocation, vectorToTarget.toUnit().multiplyScalar(200), ProjectileType.enemy);
+        }
     }
 }
 

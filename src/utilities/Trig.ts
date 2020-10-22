@@ -12,6 +12,14 @@ export class Point {
         return new Point(vector.x, vector.y);
     }
 
+    public toVector(): Vector {
+        return new Vector(this.x, this.y);
+    }
+
+    public add(other: Point): Point {
+        return new Point(this.x + other.x, this.y + other.y);
+    }
+
     public distanceTo(other: Point): number {
         return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
     }
@@ -128,4 +136,14 @@ export function degreesToRadians(degrees: number) : number {
 
 export function radiansToDegrees(radians: number) : number {
     return radians * (180 / Math.PI);
+}
+
+export function normalizeDegrees(degrees: number) : number {
+    degrees = degrees % 360;
+
+    if(degrees < 0) {
+        degrees += 360;
+    }
+
+    return degrees;
 }

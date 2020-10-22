@@ -25,4 +25,8 @@ export class DimensionsComponent extends Component {
         this._rotationInDegrees = degrees;
         this._rotationInRadians = degreesToRadians(degrees);
     }
+
+    public get centerLocation(): Point {
+        return this.bounds.location.add(this.center);
+    }
 }

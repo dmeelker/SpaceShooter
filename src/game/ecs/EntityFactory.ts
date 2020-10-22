@@ -30,19 +30,21 @@ export function createProjectile(game: IGameContext, location: Point, vector: Ve
     const image = game.images.get("shot");
     const entityId = game.ecs.allocateEntityId();
 
-    const dimensions = new DimensionsComponent(entityId, new Rectangle(location.x, location.y, image.width, image.height));
+    const entityLocation = new Point(location.x - (image.width / 2), location.y - (image.height / 2));
+
+    const dimensions = new DimensionsComponent(entityId, new Rectangle(entityLocation.x, entityLocation.y, image.width, image.height));
     dimensions.center = new Point(image.width / 2, image.height / 2);
     dimensions.rotationInDegrees = vector.angleInDegrees;
     
     game.ecs.components.dimensionsComponents.add(dimensions);
     game.ecs.components.renderComponents.add(new RenderComponent(entityId, new StaticImageProvider(image)));
     game.ecs.components.projectileComponents.add(new ProjectileComponent(entityId, 1, type));
+    game.ecs.components.velocityComponents.add(new VelocityComponent(entityId, vector));
     
-    if(type == ProjectileType.enemy) {
-        game.ecs.components.seekingTargetComponents.add(new SeekingTargetComponent(entityId, game.playerId));
-    } else {
-        game.ecs.components.velocityComponents.add(new VelocityComponent(entityId, vector));
-    }
+    // if(type == ProjectileType.enemy) {
+    //     game.ecs.components.seekingTargetComponents.add(new SeekingTargetComponent(entityId, game.playerId));
+    // } else {
+    //}
     return entityId;
 }
 
