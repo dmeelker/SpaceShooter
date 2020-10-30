@@ -23,6 +23,7 @@ import { EnemyGenerator } from "./game/EnemyGenerator";
 import { AnimationDefinition, AnimationRepository } from "./utilities/Animation";
 import { PlayerScore } from "./game/PlayerScore";
 import { Font, prepareFont } from "./utilities/Font";
+import { Ui } from "./utilities/UI";
 
 class GameContext implements IGameContext {
     public time: FrameTime;
@@ -45,7 +46,7 @@ class GameContext implements IGameContext {
 }
 
 const context = new GameContext();
-
+const viewScale = 2;
 const frameCounter = new FrameCounter();
 const keyboard = new Keyboard();
 let enemyGenerator: EnemyGenerator;
@@ -58,6 +59,8 @@ let lastFrameTime = 0;
 
 const hpLabel = document.getElementById("hpLabel");
 
+const ui = new Ui();
+
 async function main() {
     await initialize();
 
@@ -69,6 +72,7 @@ async function initialize() {
     await loadImages();
     setupAnimations();
     loadFonts();
+    hookCanvasEvents();
 
     resetGame();
 }
@@ -104,6 +108,25 @@ async function createAnimationFromImage(code: string, horizontalSprites: number,
 function loadFonts() {
     context.smallFont = prepareFont(PixelFontSmall, context.images.get("pixelfont-small"));
     context.mediumFont = prepareFont(PixelFontMedium, context.images.get("pixelfont-medium"));
+
+    ui.defaultFont = context.smallFont;
+}
+
+function hookCanvasEvents() {
+    context.canvas.addEventListener("mousemove", event => {
+        let x = Math.floor((event.pageX - context.canvas.offsetLeft) / viewScale);
+        let y = Math.floor((event.pageY - context.canvas.offsetTop) / viewScale);
+
+        ui.mouseMove(x, y);
+    });
+
+    context.canvas.addEventListener("mousedown", event => {
+        ui.mouseDown();
+    });
+
+    context.canvas.addEventListener("mouseup", event => {
+        ui.mouseUp();
+    });
 }
 
 function resetGame() {
@@ -120,6 +143,7 @@ function processFrame(time: number) {
 
     update(context.time);
     render();
+    ui.frameDone();
 
     frameCounter.frame();
     window.requestAnimationFrame(processFrame)
@@ -205,6 +229,10 @@ function render() {
 
     const ship = context.ecs.components.projectileTargetComponents.get(context.playerId);
     context.smallFont.render(context.renderContext, new Point(5, context.viewSize.size.height - context.smallFont.LineHeight - 5),  `HP: ${ship.hitpoints.toString()} Score: ${context.score.points}`);
+
+    if(ui.textButton(context.renderContext, new Rectangle(10, 10, 100, 20), "Test")) {
+        console.log("CLICK!");
+    }
 }
 
 main();

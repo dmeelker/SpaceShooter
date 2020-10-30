@@ -34,6 +34,26 @@ export class Rectangle {
     public location: Point;
     public size: Size;
 
+    public get x(): number {
+        return this.location.x;
+    }
+
+    public get y(): number {
+        return this.location.y;
+    }
+
+    public get width(): number {
+        return this.size.width;
+    }
+
+    public get height(): number {
+        return this.size.height;
+    }
+
+    public get center(): Point {
+        return new Point(this.x + (this.width / 2), this.y + (this.height / 2));
+    }
+
     constructor(x: number, y: number, width: number, height: number) {
         this.location = new Point(x, y);
         this.size = {width, height};
