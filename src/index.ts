@@ -9,6 +9,8 @@ import * as ShipControllerSystem from "./game/ecs/systems/ShipControllerSystem";
 import * as EntityCleanupSystem from "./game/ecs/systems/EntityCleanupSystem"
 import * as TimedDestroySystem from "./game/ecs/systems/TimedDestroySystem"
 import * as SeekingTargetSystem from "./game/ecs/systems/SeekingTargetSystem"
+import PixelFontSmall from "./fonts/PixelFontSmall"
+import PixelFontMedium from "./fonts/PixelFontMedium"
 import { Point, Rectangle, Vector } from "./utilities/Trig";
 import { FrameTime } from "./utilities/FrameTime";
 import { createAsteroid, createPlayerShip, createProjectile } from "./game/ecs/EntityFactory";
@@ -20,6 +22,7 @@ import { StarField } from "./game/StarField";
 import { EnemyGenerator } from "./game/EnemyGenerator";
 import { AnimationDefinition, AnimationRepository } from "./utilities/Animation";
 import { PlayerScore } from "./game/PlayerScore";
+import { Font, prepareFont } from "./utilities/Font";
 
 class GameContext implements IGameContext {
     public time: FrameTime;
@@ -31,6 +34,8 @@ class GameContext implements IGameContext {
     public readonly animations = new AnimationRepository();
     public playerId: EntityId;
     public readonly score = new PlayerScore();
+    public smallFont: Font;
+    public mediumFont: Font;
 
     public levelToScreenCoordinates(levelCoordinates: Point): Point {
         return new Point(
@@ -63,6 +68,7 @@ async function initialize() {
     initializeGameContext();
     await loadImages();
     setupAnimations();
+    loadFonts();
 
     resetGame();
 }
@@ -80,6 +86,8 @@ async function loadImages() {
     await context.images.load("shot", "gfx/shot.png");
     await context.images.load("explosion", "gfx/explosion.png");
     await context.images.load("asteroid", "gfx/asteroid.png");
+    await context.images.load("pixelfont-small", "gfx/pixelfont-small.png");
+    await context.images.load("pixelfont-medium", "gfx/pixelfont-medium.png");
 }
 
 async function setupAnimations() {
@@ -91,6 +99,11 @@ async function createAnimationFromImage(code: string, horizontalSprites: number,
     const frames = await new SpriteSheetLoader().cutSpriteSheet(image, horizontalSprites, verticalSprites);
 
     context.animations.add(code, new AnimationDefinition(frames, animationSpeed));
+}
+
+function loadFonts() {
+    context.smallFont = prepareFont(PixelFontSmall, context.images.get("pixelfont-small"));
+    context.mediumFont = prepareFont(PixelFontMedium, context.images.get("pixelfont-medium"));
 }
 
 function resetGame() {
@@ -188,13 +201,10 @@ function render() {
     context.renderContext.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
     starFields.forEach(field => field.render(context.renderContext));
-    //starField.render(context.renderContext);
-
     RenderSystem.render(context.ecs, context.renderContext);
 
-    // context.renderContext.font = '12px sans-serif';
-    // context.renderContext.fillStyle = "white";
-    // context.renderContext.fillText('Hello world', 10, 50);
+    const ship = context.ecs.components.projectileTargetComponents.get(context.playerId);
+    context.smallFont.render(context.renderContext, new Point(5, context.viewSize.size.height - context.smallFont.LineHeight - 5),  `HP: ${ship.hitpoints.toString()} Score: ${context.score.points}`);
 }
 
 main();
