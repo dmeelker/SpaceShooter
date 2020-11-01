@@ -1,10 +1,10 @@
-import { IGameContext } from "../../../GameContext";
+import { Game } from "../../..";
 
-export function update(context: IGameContext) {
-    const viewSizeWithMargin = context.viewSize.addBorder(50);
-    for (let dimensions of context.ecs.components.dimensionsComponents.all) {
+export function update(game: Game) {
+    const viewSizeWithMargin = game.view.size.addBorder(50);
+    for (let dimensions of game.state.ecs.components.dimensionsComponents.all) {
         if (!dimensions.bounds.overlaps(viewSizeWithMargin)) {
-            context.ecs.disposeEntity(dimensions.entityId);
+            game.state.ecs.disposeEntity(dimensions.entityId);
         }
     }
 }

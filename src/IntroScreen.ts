@@ -1,19 +1,19 @@
-import { IGameContext } from "./GameContext";
+import { Game } from ".";
 import { FrameTime } from "./utilities/FrameTime";
 import { IScreen } from "./utilities/ScreenManager";
 import { Point, Rectangle } from "./utilities/Trig";
 import { DomUiEventProvider, Ui } from "./utilities/Ui";
 
 export class IntroScreen implements IScreen {
-    private readonly _gameContext: IGameContext;
+    private readonly _game: Game;
     private readonly _ui = new Ui();
     private readonly _uiInputProvider;
 
-    public constructor(gameContext: IGameContext) {
-        this._gameContext = gameContext;
-        this._uiInputProvider = new DomUiEventProvider(this._ui, gameContext.canvas);
+    public constructor(game: Game) {
+        this._game = game;
+        this._uiInputProvider = new DomUiEventProvider(this._ui, game.view.canvas);
 
-        this._ui.defaultFont = gameContext.smallFont;
+        this._ui.defaultFont = game.fonts.small;
     }
 
     onActivate(): void {
@@ -29,10 +29,10 @@ export class IntroScreen implements IScreen {
     }
 
     render(renderContext: CanvasRenderingContext2D): void {
-        this._gameContext.mediumFont.render(renderContext, new Point(100, 100), "INTRO!");
+        this._game.fonts.medium.render(renderContext, new Point(100, 100), "INTRO!");
 
         if(this._ui.textButton(renderContext, new Rectangle(10, 10, 200, 40), "Play!")) {
-            this._gameContext.screenManager.activateScreen(this._gameContext.playScreen);
+            this._game.screenManager.activateScreen(this._game.playScreen);
         }
 
         this._ui.frameDone();   

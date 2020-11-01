@@ -1,14 +1,13 @@
-import { EntityComponentSystem } from "../EntityComponentSystem";
 import { DimensionsComponent } from "../components/DimensionsComponent";
 import { VelocityComponent } from "../components/VelocityComponent";
 import { FrameTime } from "../../../utilities/FrameTime";
-import { IGameContext } from "../../../GameContext";
+import { Game } from "../../..";
 
-export function update(context: IGameContext) {
-    for(let velocityComponent of context.ecs.components.velocityComponents.all) {
-        const dimensions = context.ecs.components.dimensionsComponents.get(velocityComponent.entityId);
+export function update(game: Game) {
+    for(let velocityComponent of game.state.ecs.components.velocityComponents.all) {
+        const dimensions = game.state.ecs.components.dimensionsComponents.get(velocityComponent.entityId);
 
-        updateComponent(context.time, velocityComponent, dimensions);
+        updateComponent(game.time, velocityComponent, dimensions);
     }
 }
 

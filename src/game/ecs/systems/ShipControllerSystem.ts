@@ -1,4 +1,4 @@
-import { IGameContext } from "../../../GameContext";
+import { Game } from "../../..";
 import { FrameTime } from "../../../utilities/FrameTime";
 import { normalizeDegrees, Point, Vector } from "../../../utilities/Trig";
 import { ComputerControlledShipComponent, MovementMode } from "../components/ComputerControlledShipComponent";
@@ -6,37 +6,37 @@ import { DimensionsComponent } from "../components/DimensionsComponent";
 import { ProjectileType } from "../components/ProjectileComponent";
 import { createProjectile } from "../EntityFactory";
 
-export function update(context: IGameContext) {
-    for (let ship of context.ecs.components.computerControlledShipComponents.all) {
-        const dimensions = context.ecs.components.dimensionsComponents.get(ship.entityId);
+export function update(game: Game) {
+    for (let ship of game.state.ecs.components.computerControlledShipComponents.all) {
+        const dimensions = game.state.ecs.components.dimensionsComponents.get(ship.entityId);
 
-        moveShip(ship, dimensions, context.time, context);
-        updateFire(ship, context, dimensions);
+        moveShip(ship, dimensions, game.time, game);
+        updateFire(ship, game, dimensions);
     }
 }
 
-function updateFire(ship: ComputerControlledShipComponent, context: IGameContext, dimensions: DimensionsComponent) {
-    if (ship.fireTimer.update(context.time.currentTime)) {
+function updateFire(ship: ComputerControlledShipComponent, game: Game, dimensions: DimensionsComponent) {
+    if (ship.fireTimer.update(game.time.currentTime)) {
         const shipLocation = dimensions.centerLocation;
-        const targetLocation = context.ecs.components.dimensionsComponents.get(context.playerId).centerLocation;
+        const targetLocation = game.state.ecs.components.dimensionsComponents.get(game.state.playerId).centerLocation;
         const vectorToTarget = targetLocation.toVector().subtract(shipLocation.toVector());
 
         const shipHeading = normalizeDegrees(dimensions.rotationInDegrees);
         const headingToTarget = normalizeDegrees(vectorToTarget.angleInDegrees);
 
         if(Math.abs(shipHeading - headingToTarget) < 90) {
-            createProjectile(context, shipLocation, vectorToTarget.toUnit().multiplyScalar(200), ProjectileType.enemy);
+            createProjectile(game, shipLocation, vectorToTarget.toUnit().multiplyScalar(200), ProjectileType.enemy);
         }
     }
 }
 
-function moveShip(ship: ComputerControlledShipComponent, dimensions: DimensionsComponent, time: FrameTime, context: IGameContext) {
+function moveShip(ship: ComputerControlledShipComponent, dimensions: DimensionsComponent, time: FrameTime, game: Game) {
     if(ship.movementMode == MovementMode.straightLine) {
         dimensions.bounds.location.x += time.calculateMovement(ship.vector.x);
         dimensions.bounds.location.y += time.calculateMovement(ship.vector.y);
         dimensions.rotationInDegrees = ship.vector.angleInDegrees;
     } else if(ship.movementMode == MovementMode.path) {
-        const target = levelToScreenCoordinates(ship.path[ship.currentPathTarget], context);
+        const target = levelToScreenCoordinates(ship.path[ship.currentPathTarget], game);
 
         if (dimensions.bounds.location.distanceTo(target) <= 20) {
             if(ship.currentPathTarget < ship.path.length - 1) {
@@ -46,12 +46,12 @@ function moveShip(ship: ComputerControlledShipComponent, dimensions: DimensionsC
                 ship.movementMode = MovementMode.straightLine;
             }
         } else {
-            moveTowardsPoint(ship, dimensions, target, time);
+            moveTowardsPoint(dimensions, target, time);
         }
     }
 }
 
-function moveTowardsPoint(ship: ComputerControlledShipComponent, dimensions: DimensionsComponent, target: Point, time: FrameTime) {
+function moveTowardsPoint(dimensions: DimensionsComponent, target: Point, time: FrameTime) {
     const targetVector = new Vector(target.x - dimensions.bounds.location.x, target.y - dimensions.bounds.location.y).toUnit();
     const targetRotation = targetVector.angleInDegrees;
     const currentRotation = dimensions.rotationInDegrees;
@@ -73,8 +73,8 @@ function moveTowardsPoint(ship: ComputerControlledShipComponent, dimensions: Dim
     dimensions.rotationInDegrees = vector.angleInDegrees;
 }
 
-function levelToScreenCoordinates(levelCoordinates: Point, context: IGameContext): Point {
+function levelToScreenCoordinates(levelCoordinates: Point, game: Game): Point {
     return new Point(
-        context.viewSize.size.width * (levelCoordinates.x / 100),
-        context.viewSize.size.height * (levelCoordinates.y / 100))
+        game.view.size.size.width * (levelCoordinates.x / 100),
+        game.view.size.size.height * (levelCoordinates.y / 100))
 }

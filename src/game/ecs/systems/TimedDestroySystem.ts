@@ -1,10 +1,9 @@
-import { EntityComponentSystem } from "../EntityComponentSystem";
-import { IGameContext } from "../../../GameContext";
+import { Game } from "../../..";
 
-export function update(game: IGameContext) {
-    for(let component of game.ecs.components.timedDestroyComponents.all) {
+export function update(game: Game) {
+    for(let component of game.state.ecs.components.timedDestroyComponents.all) {
         if(component.destroyTime <= game.time.currentTime) {
-            game.ecs.disposeEntity(component.entityId);
+            game.state.ecs.disposeEntity(component.entityId);
         }
     }
 }

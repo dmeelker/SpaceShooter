@@ -1,12 +1,12 @@
 import { DimensionsComponent } from "../components/DimensionsComponent";
 import { FrameTime } from "../../../utilities/FrameTime";
-import { IGameContext } from "../../../GameContext";
 import { Point, Vector } from "../../../utilities/Trig";
+import { Game } from "../../..";
 
-export function update(game: IGameContext) {
-    for(let targetComponent of game.ecs.components.seekingTargetComponents.all) {
-        const dimensions = game.ecs.components.dimensionsComponents.get(targetComponent.entityId);
-        const targetDimensions = game.ecs.components.dimensionsComponents.get(targetComponent.targetId);
+export function update(game: Game) {
+    for(let targetComponent of game.state.ecs.components.seekingTargetComponents.all) {
+        const dimensions = game.state.ecs.components.dimensionsComponents.get(targetComponent.entityId);
+        const targetDimensions = game.state.ecs.components.dimensionsComponents.get(targetComponent.targetId);
 
         moveTowardsTarget(dimensions, targetDimensions.bounds.location, game.time);
     }
