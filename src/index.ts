@@ -1,29 +1,19 @@
 import { Images } from "./utilities/Images";
 import { FrameCounter } from "./utilities/FrameCounter";
-import { Keyboard } from "./utilities/Keyboard";
 import { EntityComponentSystem, EntityId } from "./game/ecs/EntityComponentSystem";
-import * as RenderSystem from "./game/ecs/systems/RenderSystem";
-import * as MovementSystem from "./game/ecs/systems/MovementSystem";
-import * as ProjectileSystem from "./game/ecs/systems/ProjectileSystem";
-import * as ShipControllerSystem from "./game/ecs/systems/ShipControllerSystem";
-import * as EntityCleanupSystem from "./game/ecs/systems/EntityCleanupSystem"
-import * as TimedDestroySystem from "./game/ecs/systems/TimedDestroySystem"
-import * as SeekingTargetSystem from "./game/ecs/systems/SeekingTargetSystem"
 import PixelFontSmall from "./fonts/PixelFontSmall"
 import PixelFontMedium from "./fonts/PixelFontMedium"
 import { Point, Rectangle, Vector } from "./utilities/Trig";
 import { FrameTime } from "./utilities/FrameTime";
-import { createAsteroid, createPlayerShip, createProjectile } from "./game/ecs/EntityFactory";
 import { SpriteSheetLoader } from "./utilities/SpriteSheetLoader";
 import { IGameContext } from "./GameContext";
-import { ProjectileType } from "./game/ecs/components/ProjectileComponent";
-import { Timer } from "./utilities/Timer";
-import { StarField } from "./game/StarField";
-import { EnemyGenerator } from "./game/EnemyGenerator";
 import { AnimationDefinition, AnimationRepository } from "./utilities/Animation";
 import { PlayerScore } from "./game/PlayerScore";
 import { Font, prepareFont } from "./utilities/Font";
 import { Ui } from "./utilities/UI";
+import { ScreenManager } from "./utilities/ScreenManager";
+import { IntroScreen } from "./IntroScreen";
+import { PlayScreen } from "./PlayScreen";
 
 class GameContext implements IGameContext {
     public time: FrameTime;
@@ -33,6 +23,12 @@ class GameContext implements IGameContext {
     public readonly images = new Images();
     public readonly ecs = new EntityComponentSystem();
     public readonly animations = new AnimationRepository();
+
+    public introScreen: IntroScreen;
+    public playScreen: PlayScreen;
+    public screenManager: ScreenManager;
+
+
     public playerId: EntityId;
     public readonly score = new PlayerScore();
     public smallFont: Font;
@@ -48,12 +44,6 @@ class GameContext implements IGameContext {
 const context = new GameContext();
 const viewScale = 2;
 const frameCounter = new FrameCounter();
-const keyboard = new Keyboard();
-let enemyGenerator: EnemyGenerator;
-let starFields : Array<StarField>;
-
-let shipSpeed = 200;
-const fireTimer = new Timer(200);
 
 let lastFrameTime = 0;
 
@@ -72,17 +62,13 @@ async function initialize() {
     await loadImages();
     setupAnimations();
     loadFonts();
-    hookCanvasEvents();
-
-    resetGame();
+    intializeScreens();
 }
 
 function initializeGameContext() {
     context.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     context.renderContext = context.canvas.getContext("2d");
     context.viewSize = new Rectangle(0, 0, context.canvas.width, context.canvas.height);
-
-    starFields = [new StarField(context.viewSize.size, 20, 1300), new StarField(context.viewSize.size, 25, 1300), new StarField(context.viewSize.size, 30, 1300)];
 }
 
 async function loadImages() {
@@ -112,30 +98,10 @@ function loadFonts() {
     ui.defaultFont = context.smallFont;
 }
 
-function hookCanvasEvents() {
-    context.canvas.addEventListener("mousemove", event => {
-        let x = Math.floor((event.pageX - context.canvas.offsetLeft) / viewScale);
-        let y = Math.floor((event.pageY - context.canvas.offsetTop) / viewScale);
-
-        ui.mouseMove(x, y);
-    });
-
-    context.canvas.addEventListener("mousedown", event => {
-        ui.mouseDown();
-    });
-
-    context.canvas.addEventListener("mouseup", event => {
-        ui.mouseUp();
-    });
-}
-
-function resetGame() {
-    context.ecs.clear();
-    context.score.reset();
-    enemyGenerator = new EnemyGenerator();
-    context.playerId = createPlayerShip(context, context.levelToScreenCoordinates(new Point(5, 50)));
-
-    createAsteroid(context, context.levelToScreenCoordinates(new Point(100, 50)));
+function intializeScreens() {
+    context.introScreen = new IntroScreen(context);
+    context.playScreen = new PlayScreen(context);
+    context.screenManager = new ScreenManager(context.introScreen);
 }
 
 function processFrame(time: number) {
@@ -157,66 +123,7 @@ function updateFrameTime(time: number) {
 }
 
 function update(time: FrameTime) {
-    checkPlayerDestroyed();
-    handleInput(time);
-    updateUi();
-
-    starFields.forEach(field => field.update(time));
-    enemyGenerator.update(context);
-    //levelProgress.update(time, context);
-    ShipControllerSystem.update(context);
-    MovementSystem.update(context);
-    ProjectileSystem.update(context);
-    SeekingTargetSystem.update(context);
-    TimedDestroySystem.update(context);
-    EntityCleanupSystem.update(context);
-    context.ecs.removeDisposedEntities();
-
-    keyboard.nextFrame();
-}
-
-function checkPlayerDestroyed() {
-    const dimensions = context.ecs.components.dimensionsComponents.get(context.playerId);
-
-    if(dimensions == undefined) {
-        resetGame();
-    }
-}
-
-function handleInput(time: FrameTime) {
-    const dimensions = context.ecs.components.dimensionsComponents.get(context.playerId);
-    let location = dimensions.bounds.location;
-
-    if (keyboard.isButtonDown("ArrowLeft")) {
-        location.x -= time.calculateMovement(shipSpeed);
-    }
-    if (keyboard.isButtonDown("ArrowRight")) {
-        location.x += time.calculateMovement(shipSpeed);
-    }
-    if (keyboard.isButtonDown("ArrowUp")) {
-        location.y -= time.calculateMovement(shipSpeed);
-    }
-    if (keyboard.isButtonDown("ArrowDown")) {
-        location.y += time.calculateMovement(shipSpeed);
-    }
-
-    if(location.x < 0) location.x = 0;
-    if(location.x + dimensions.bounds.size.width > context.viewSize.size.width) location.x = context.viewSize.size.width - dimensions.bounds.size.width;
-    if(location.y < 0) location.y = 0;
-    if(location.y + dimensions.bounds.size.height > context.viewSize.size.height) location.y = context.viewSize.size.height - dimensions.bounds.size.height;
-
-    if((fireTimer.update(time.currentTime) && keyboard.isButtonDown("Space")) || keyboard.wasButtonPressedInFrame("Space")) {
-        const tankBounds = context.ecs.components.dimensionsComponents.get(context.playerId).bounds;
-
-        //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(-25).multiplyScalar(500), ProjectileType.player);
-        createProjectile(context, tankBounds.location, Vector.fromDegreeAngle(0).multiplyScalar(500), ProjectileType.player);
-        //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(25).multiplyScalar(500), ProjectileType.player);
-    }
-}
-
-function updateUi() {
-    const ship = context.ecs.components.projectileTargetComponents.get(context.playerId);
-    hpLabel.innerText = `HP: ${ship.hitpoints.toString()} Score: ${context.score.points}`;
+    context.screenManager.activeScreen.update(time);
 }
 
 function render() {
@@ -224,15 +131,7 @@ function render() {
     context.renderContext.fillStyle = "black";
     context.renderContext.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
-    starFields.forEach(field => field.render(context.renderContext));
-    RenderSystem.render(context.ecs, context.renderContext);
-
-    const ship = context.ecs.components.projectileTargetComponents.get(context.playerId);
-    context.smallFont.render(context.renderContext, new Point(5, context.viewSize.size.height - context.smallFont.LineHeight - 5),  `HP: ${ship.hitpoints.toString()} Score: ${context.score.points}`);
-
-    if(ui.textButton(context.renderContext, new Rectangle(10, 10, 100, 20), "Test")) {
-        console.log("CLICK!");
-    }
+    context.screenManager.activeScreen.render(context.renderContext);
 }
 
 main();

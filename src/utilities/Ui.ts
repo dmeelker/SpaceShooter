@@ -1,4 +1,3 @@
-import { createJsxClosingElement } from "typescript";
 import { Font } from "./Font";
 import { Point, Rectangle } from "./Trig";
 
@@ -13,6 +12,49 @@ class MouseState {
         clone.y = this.y;
         clone.buttonDown = this.buttonDown;
         return clone;
+    }
+}
+
+type MouseEventHandler = (event: MouseEvent) => void;
+
+export class DomUiEventProvider {
+    private readonly _element: HTMLElement;
+    private readonly _ui: Ui;
+
+    private _mouseMoveHandler: MouseEventHandler;
+    private _mouseDownHandler: MouseEventHandler;
+    private _mouseUpHandler: MouseEventHandler;
+    
+    constructor(ui: Ui, element: HTMLElement) {
+        this._ui = ui;
+        this._element = element;
+
+        this._mouseMoveHandler = event => {
+            let x = Math.floor((event.pageX - element.offsetLeft) / 2);
+            let y = Math.floor((event.pageY - element.offsetTop) / 2);
+    
+            this._ui.mouseMove(x, y);
+        };
+
+        this._mouseDownHandler = event => {
+            this._ui.mouseDown();
+        };
+
+        this._mouseUpHandler = event => {
+            this._ui.mouseUp();
+        };
+    }
+
+    public hook() {
+        this._element.addEventListener("mousemove", this._mouseMoveHandler);
+        this._element.addEventListener("mousedown", this._mouseDownHandler);
+        this._element.addEventListener("mouseup", this._mouseUpHandler);
+    }
+
+    public unhook() {
+        this._element.removeEventListener("mousemove", this._mouseMoveHandler);
+        this._element.removeEventListener("mousedown", this._mouseDownHandler);
+        this._element.removeEventListener("mouseup", this._mouseUpHandler);
     }
 }
 
@@ -50,11 +92,11 @@ export class Ui {
             this.defaultFont.render(context, new Point(center.x - (stringSize.width / 2), center.y - (stringSize.height / 2)), text);
         }
 
-        if(this.mouseClickedIn(rectangle)) {
-            return true;
-        }
+        return this.button(rectangle);
+    }
 
-        return false;
+    private button(rectangle: Rectangle): boolean {
+        return this.mouseClickedIn(rectangle);
     }
 
     private mouseHoverIn(rectangle: Rectangle): boolean {
