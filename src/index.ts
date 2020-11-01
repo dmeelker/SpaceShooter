@@ -21,8 +21,8 @@ export class ViewInfo {
 
     public levelToScreenCoordinates(levelCoordinates: Point): Point {
         return new Point(
-            this.size.size.width * (levelCoordinates.x / 100),
-            this.size.size.height * (levelCoordinates.y / 100))
+            this.size.width * (levelCoordinates.x / 100),
+            this.size.height * (levelCoordinates.y / 100))
     }
 }
 
@@ -32,7 +32,11 @@ export class Fonts {
 }
 
 export class Game {
-    public time: FrameTime;
+    private _time: FrameTime;
+
+    public get time(): FrameTime {
+        return this._time;
+    }
 
     public readonly view = new ViewInfo();
     public readonly images = new Images();
@@ -44,7 +48,7 @@ export class Game {
     public playScreen: PlayScreen;
     public screenManager: ScreenManager;
 
-    public state = new GameState();
+    public readonly state = new GameState();
 
     private readonly _frameCounter = new FrameCounter();
     private _lastFrameTime = 0;
@@ -54,15 +58,15 @@ export class Game {
         this.requestAnimationFrame();
     }
  
-    async initialize() {
-        this.initializeGameContext();
+    private async initialize() {
+        this.setupView();
         await this.loadImages();
         this.setupAnimations();
         this.loadFonts();
         this.intializeScreens();
     }
 
-    private initializeGameContext() {
+    private setupView() {
         const canvas = document.getElementById("canvas") as HTMLCanvasElement;
         canvas.style.width = (canvas.width * this.view.scale) + "px";
         canvas.style.height = (canvas.height * this.view.scale) + "px";
@@ -109,7 +113,7 @@ export class Game {
     }
 
     private processFrame(time: number) {
-        this.time = this.updateFrameTime(time);
+        this._time = this.updateFrameTime(time);
 
         this.update(this.time);
         this.render();

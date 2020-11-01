@@ -20,18 +20,20 @@ type MouseEventHandler = (event: MouseEvent) => void;
 export class DomUiEventProvider {
     private readonly _element: HTMLElement;
     private readonly _ui: Ui;
+    private readonly _viewScale: number;
 
     private _mouseMoveHandler: MouseEventHandler;
     private _mouseDownHandler: MouseEventHandler;
     private _mouseUpHandler: MouseEventHandler;
     
-    constructor(ui: Ui, element: HTMLElement) {
+    constructor(ui: Ui, element: HTMLElement, viewScale: number) {
         this._ui = ui;
         this._element = element;
+        this._viewScale = viewScale;
 
         this._mouseMoveHandler = event => {
-            let x = Math.floor((event.pageX - element.offsetLeft) / 2);
-            let y = Math.floor((event.pageY - element.offsetTop) / 2);
+            let x = Math.floor((event.pageX - element.offsetLeft) / this._viewScale);
+            let y = Math.floor((event.pageY - element.offsetTop) / this._viewScale);
     
             this._ui.mouseMove(x, y);
         };

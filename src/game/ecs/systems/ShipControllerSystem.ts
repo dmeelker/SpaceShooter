@@ -36,7 +36,7 @@ function moveShip(ship: ComputerControlledShipComponent, dimensions: DimensionsC
         dimensions.bounds.location.y += time.calculateMovement(ship.vector.y);
         dimensions.rotationInDegrees = ship.vector.angleInDegrees;
     } else if(ship.movementMode == MovementMode.path) {
-        const target = levelToScreenCoordinates(ship.path[ship.currentPathTarget], game);
+        const target = game.view.levelToScreenCoordinates(ship.path[ship.currentPathTarget]);
 
         if (dimensions.bounds.location.distanceTo(target) <= 20) {
             if(ship.currentPathTarget < ship.path.length - 1) {
@@ -71,10 +71,4 @@ function moveTowardsPoint(dimensions: DimensionsComponent, target: Point, time: 
     dimensions.bounds.location.x += time.calculateMovement(vector.x);
     dimensions.bounds.location.y += time.calculateMovement(vector.y);
     dimensions.rotationInDegrees = vector.angleInDegrees;
-}
-
-function levelToScreenCoordinates(levelCoordinates: Point, game: Game): Point {
-    return new Point(
-        game.view.size.size.width * (levelCoordinates.x / 100),
-        game.view.size.size.height * (levelCoordinates.y / 100))
 }

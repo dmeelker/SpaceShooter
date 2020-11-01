@@ -11,7 +11,7 @@ export class IntroScreen implements IScreen {
 
     public constructor(game: Game) {
         this._game = game;
-        this._uiInputProvider = new DomUiEventProvider(this._ui, game.view.canvas);
+        this._uiInputProvider = new DomUiEventProvider(this._ui, game.view.canvas, game.view.scale);
 
         this._ui.defaultFont = game.fonts.small;
     }
