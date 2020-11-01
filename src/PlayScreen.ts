@@ -6,7 +6,7 @@ import { FrameTime } from "./utilities/FrameTime";
 import { IScreen } from "./utilities/ScreenManager";
 import { Timer } from "./utilities/Timer";
 import { Point, Vector } from "./utilities/Trig";
-import { DomUiEventProvider, Ui } from "./utilities/UI";
+import { DomUiEventProvider, Ui } from "./utilities/Ui";
 import * as RenderSystem from "./game/ecs/systems/RenderSystem";
 import * as MovementSystem from "./game/ecs/systems/MovementSystem";
 import * as ProjectileSystem from "./game/ecs/systems/ProjectileSystem";

@@ -2,7 +2,7 @@ import { IGameContext } from "./GameContext";
 import { FrameTime } from "./utilities/FrameTime";
 import { IScreen } from "./utilities/ScreenManager";
 import { Point, Rectangle } from "./utilities/Trig";
-import { DomUiEventProvider, Ui } from "./utilities/UI";
+import { DomUiEventProvider, Ui } from "./utilities/Ui";
 
 export class IntroScreen implements IScreen {
     private readonly _gameContext: IGameContext;
@@ -12,6 +12,8 @@ export class IntroScreen implements IScreen {
     public constructor(gameContext: IGameContext) {
         this._gameContext = gameContext;
         this._uiInputProvider = new DomUiEventProvider(this._ui, gameContext.canvas);
+
+        this._ui.defaultFont = gameContext.smallFont;
     }
 
     onActivate(): void {

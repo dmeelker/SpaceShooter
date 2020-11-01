@@ -10,7 +10,6 @@ import { IGameContext } from "./GameContext";
 import { AnimationDefinition, AnimationRepository } from "./utilities/Animation";
 import { PlayerScore } from "./game/PlayerScore";
 import { Font, prepareFont } from "./utilities/Font";
-import { Ui } from "./utilities/UI";
 import { ScreenManager } from "./utilities/ScreenManager";
 import { IntroScreen } from "./IntroScreen";
 import { PlayScreen } from "./PlayScreen";
@@ -20,6 +19,8 @@ class GameContext implements IGameContext {
     public canvas: HTMLCanvasElement;
     public renderContext: CanvasRenderingContext2D;
     public viewSize: Rectangle;
+    public viewScale: number = 2;
+
     public readonly images = new Images();
     public readonly ecs = new EntityComponentSystem();
     public readonly animations = new AnimationRepository();
@@ -42,14 +43,9 @@ class GameContext implements IGameContext {
 }
 
 const context = new GameContext();
-const viewScale = 2;
+
 const frameCounter = new FrameCounter();
-
 let lastFrameTime = 0;
-
-const hpLabel = document.getElementById("hpLabel");
-
-const ui = new Ui();
 
 async function main() {
     await initialize();
@@ -68,6 +64,10 @@ async function initialize() {
 function initializeGameContext() {
     context.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     context.renderContext = context.canvas.getContext("2d");
+    context.canvas.style.width = (context.canvas.width * context.viewScale) + "px";
+    context.canvas.style.height = (context.canvas.height * context.viewScale) + "px";
+    context.canvas.style.imageRendering = "pixelated";
+
     context.viewSize = new Rectangle(0, 0, context.canvas.width, context.canvas.height);
 }
 
@@ -94,8 +94,6 @@ async function createAnimationFromImage(code: string, horizontalSprites: number,
 function loadFonts() {
     context.smallFont = prepareFont(PixelFontSmall, context.images.get("pixelfont-small"));
     context.mediumFont = prepareFont(PixelFontMedium, context.images.get("pixelfont-medium"));
-
-    ui.defaultFont = context.smallFont;
 }
 
 function intializeScreens() {
@@ -109,7 +107,6 @@ function processFrame(time: number) {
 
     update(context.time);
     render();
-    ui.frameDone();
 
     frameCounter.frame();
     window.requestAnimationFrame(processFrame)

@@ -14,6 +14,8 @@ export interface IGameContext {
     readonly canvas: HTMLCanvasElement;
     readonly renderContext: CanvasRenderingContext2D;
     readonly viewSize: Rectangle;
+    readonly viewScale: number;
+    
     readonly images: Images;
     readonly ecs: EntityComponentSystem;
     readonly animations: AnimationRepository;
