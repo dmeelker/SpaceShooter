@@ -15,6 +15,7 @@ import * as TimedDestroySystem from "./game/ecs/systems/TimedDestroySystem"
 import * as SeekingTargetSystem from "./game/ecs/systems/SeekingTargetSystem"
 import { ProjectileType } from "./game/ecs/components/ProjectileComponent";
 import { Game } from ".";
+import { Keys } from "./utilities/InputProvider";
 
 export class PlayScreen implements IScreen {
     private readonly _game: Game;
@@ -88,16 +89,16 @@ export class PlayScreen implements IScreen {
         const dimensions = this._game.state.ecs.components.dimensionsComponents.get(this._game.state.playerId);
         let location = dimensions.bounds.location;
     
-        if (this._game.keyboard.isButtonDown("ArrowLeft")) {
+        if (this._game.input.isButtonDown(Keys.MoveLeft)) {
             location.x -= time.calculateMovement(this._shipSpeed);
         }
-        if (this._game.keyboard.isButtonDown("ArrowRight")) {
+        if (this._game.input.isButtonDown(Keys.MoveRight)) {
             location.x += time.calculateMovement(this._shipSpeed);
         }
-        if (this._game.keyboard.isButtonDown("ArrowUp")) {
+        if (this._game.input.isButtonDown(Keys.MoveUp)) {
             location.y -= time.calculateMovement(this._shipSpeed);
         }
-        if (this._game.keyboard.isButtonDown("ArrowDown")) {
+        if (this._game.input.isButtonDown(Keys.MoveDown)) {
             location.y += time.calculateMovement(this._shipSpeed);
         }
     
@@ -106,7 +107,7 @@ export class PlayScreen implements IScreen {
         if(location.y < 0) location.y = 0;
         if(location.y + dimensions.bounds.size.height > this._game.view.size.size.height) location.y = this._game.view.size.size.height - dimensions.bounds.size.height;
     
-        if((this._fireTimer.update(time.currentTime) && this._game.keyboard.isButtonDown("Space")) || this._game.keyboard.wasButtonPressedInFrame("Space")) {
+        if((this._fireTimer.update(time.currentTime) && this._game.input.isButtonDown(Keys.Fire)) || this._game.input.wasButtonPressedInFrame(Keys.Fire)) {
             const tankBounds = this._game.state.ecs.components.dimensionsComponents.get(this._game.state.playerId).bounds;
     
             //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(-25).multiplyScalar(500), ProjectileType.player);

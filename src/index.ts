@@ -12,6 +12,7 @@ import { IntroScreen } from "./IntroScreen";
 import { PlayScreen } from "./PlayScreen";
 import { GameState } from "./game/GameState";
 import { Keyboard } from "./utilities/Keyboard";
+import { InputProvider, Keys } from "./utilities/InputProvider";
 
 export class ViewInfo {
     public canvas: HTMLCanvasElement;
@@ -43,6 +44,7 @@ export class Game {
     public readonly animations = new AnimationRepository();
     public readonly fonts = new Fonts();
     public readonly keyboard = new Keyboard();
+    public readonly input = new InputProvider(this.keyboard);
 
     public introScreen: IntroScreen;
     public playScreen: PlayScreen;
@@ -64,6 +66,7 @@ export class Game {
         this.setupAnimations();
         this.loadFonts();
         this.intializeScreens();
+        this.initializeKeyBindings();
     }
 
     private setupView() {
@@ -106,6 +109,20 @@ export class Game {
         this.introScreen = new IntroScreen(this);
         this.playScreen = new PlayScreen(this);
         this.screenManager = new ScreenManager(this.introScreen);
+    }
+
+    private initializeKeyBindings() {
+        this.input.addKeyboardBinding(Keys.MoveUp, "ArrowUp");
+        this.input.addKeyboardBinding(Keys.MoveDown, "ArrowDown");
+        this.input.addKeyboardBinding(Keys.MoveLeft, "ArrowLeft");
+        this.input.addKeyboardBinding(Keys.MoveRight, "ArrowRight");
+        this.input.addKeyboardBinding(Keys.Fire, "Space");
+
+        this.input.addGamepadBinding(Keys.MoveUp, 0, 12);
+        this.input.addGamepadBinding(Keys.MoveDown, 0, 13);
+        this.input.addGamepadBinding(Keys.MoveLeft, 0, 14);
+        this.input.addGamepadBinding(Keys.MoveRight, 0, 15);
+        this.input.addGamepadBinding(Keys.Fire, 0, 1);
     }
 
     private requestAnimationFrame() {
