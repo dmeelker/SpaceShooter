@@ -107,7 +107,7 @@ export class PlayScreen implements IScreen {
         if(location.y < 0) location.y = 0;
         if(location.y + dimensions.bounds.size.height > this._game.view.size.size.height) location.y = this._game.view.size.size.height - dimensions.bounds.size.height;
     
-        if((this._fireTimer.update(time.currentTime) && this._game.input.isButtonDown(Keys.Fire)) || this._game.input.wasButtonPressedInFrame(Keys.Fire)) {
+        if(this._game.input.isButtonDown(Keys.Fire) && this._fireTimer.update(time.currentTime)) {
             const tankBounds = this._game.state.ecs.components.dimensionsComponents.get(this._game.state.playerId).bounds;
     
             //createProjectile(context.ecs, context.images, tankBounds.location, Vector.fromDegreeAngle(-25).multiplyScalar(500), ProjectileType.player);

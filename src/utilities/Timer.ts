@@ -20,4 +20,8 @@ export class Timer {
             return false;
         }
     }
+
+    public reset(time: number) {
+        this._lastTime = time;
+    }
 }

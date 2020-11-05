@@ -13,6 +13,7 @@ import { PlayScreen } from "./PlayScreen";
 import { GameState } from "./game/GameState";
 import { Keyboard } from "./utilities/Keyboard";
 import { InputProvider, Keys } from "./utilities/InputProvider";
+import { GamepadPoller } from "./utilities/GamepadPoller";
 
 export class ViewInfo {
     public canvas: HTMLCanvasElement;
@@ -44,7 +45,8 @@ export class Game {
     public readonly animations = new AnimationRepository();
     public readonly fonts = new Fonts();
     public readonly keyboard = new Keyboard();
-    public readonly input = new InputProvider(this.keyboard);
+    public readonly gamepadPoller = new GamepadPoller();
+    public readonly input = new InputProvider(this.keyboard, this.gamepadPoller);
 
     public introScreen: IntroScreen;
     public playScreen: PlayScreen;
@@ -149,6 +151,7 @@ export class Game {
     private update(time: FrameTime) {
         this.screenManager.activeScreen.update(time);
         this.keyboard.nextFrame();
+        this.gamepadPoller.poll();
     }
 
     private render() {

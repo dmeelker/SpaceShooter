@@ -1,3 +1,4 @@
+import { GamepadPoller } from "./GamepadPoller";
 import { Keyboard } from "./Keyboard";
 
 export enum Keys {
@@ -14,14 +15,14 @@ class GamepadBinding {
 }
 
 export class InputProvider {
-
-
-    private readonly _keyboard;
+    private readonly _keyboard: Keyboard;
+    private readonly _gamepadPoller: GamepadPoller;
     private readonly _keyboardBindings = new Map<Keys, string>();
     private readonly _gamepadBindings = new Map<Keys, GamepadBinding>();
 
-    public constructor(keyboard: Keyboard){
+    public constructor(keyboard: Keyboard, gamepadPoller: GamepadPoller){
         this._keyboard = keyboard;
+        this._gamepadPoller = gamepadPoller;
     }
 
     public addKeyboardBinding(key: Keys, keyCode: string) {
@@ -47,11 +48,9 @@ export class InputProvider {
 
         if(this._gamepadBindings.has(key)) {
             const binding = this._gamepadBindings.get(key);
-            const gamepads = navigator.getGamepads();
-            if(gamepads[binding.gamepad]) {
-                if(gamepads[binding.gamepad].buttons[binding.button].pressed) {
-                    return true;
-                }
+
+            if (this._gamepadPoller.isButtonDown(binding.gamepad, binding.button)) {
+                return true;
             }
         }
 
@@ -66,6 +65,14 @@ export class InputProvider {
                 return true;
             }
         } 
+
+        if(this._gamepadBindings.has(key)) {
+            const binding = this._gamepadBindings.get(key);
+
+            if (this._gamepadPoller.wasButtonPressedInFrame(binding.gamepad, binding.button)) {
+                return true;
+            }
+        }
 
         return false;
     }
